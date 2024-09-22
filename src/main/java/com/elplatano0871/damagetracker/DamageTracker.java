@@ -1,4 +1,4 @@
-package com.mycompany.damagetracker;
+package com.elplatano0871.damagetracker;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
