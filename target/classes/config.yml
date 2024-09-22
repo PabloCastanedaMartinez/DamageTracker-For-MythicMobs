@@ -1,0 +1,38 @@
+bosses:
+  WARDEN_ANCIANO:
+    victory_message: |
+      &6=================================================
+      &6¡El &4Warden Anciano &7ha sido derrotado!
+      &eLos mejores luchadores fueron:
+      {top_players}
+      &6=================================================
+    top_players_to_show: 3
+  
+  Darkin:
+    victory_message: |
+      &4=================================================
+      &4¡El temible &cDarkin &4ha caído!
+      &cLos campeones más poderosos:
+      {top_players}
+      &4=================================================
+    top_players_to_show: 5
+ 
+  
+  SKELETONKING: {}
+  
+  XERATH: {}
+  
+  JEFE_EJEMPLO: {}
+
+# Configuración por defecto para jefes especificados sin configuración completa
+default_boss_config:
+  victory_message: |
+    &6=================================================
+    &6¡El jefe &4{boss_name} &7ha sido derrotado!
+    &eLos mejores luchadores fueron:
+    {top_players}
+    &6=================================================
+  top_players_to_show: 3
+
+# Formato para mostrar el daño (usa la sintaxis de String.format)
+damage_format: "%.2f"

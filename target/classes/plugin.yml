@@ -1,0 +1,19 @@
+name: DamageTracker
+version: '1.0-SNAPSHOT'
+main: com.mycompany.damagetracker.DamageTracker
+api-version: '1.21'
+depend: [MythicMobs, PlaceholderAPI]
+
+commands:
+  damagetracker:
+    description: Main command for DamageTracker plugin
+    usage: /<command> [reload|damage|top]
+    permission: damagetracker.use
+
+permissions:
+  damagetracker.use:
+    description: Allows using the DamageTracker command
+    default: true
+  damagetracker.reload:
+    description: Allows reloading the DamageTracker plugin
+    default: op
