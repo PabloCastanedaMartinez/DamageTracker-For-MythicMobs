@@ -1,6 +1,6 @@
 name: DamageTracker
 version: '${project.version}'
-main: com.mycompany.damagetracker.DamageTracker
+main: com.elplatano0871.damagetracker.DamageTracker
 api-version: '1.21'
 depend: [MythicMobs, PlaceholderAPI]
 

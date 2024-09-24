@@ -173,11 +173,6 @@ public class DamageTracker extends JavaPlugin implements Listener, CommandExecut
         String mobInternalName = activeMob.getMobType();
         UUID mobUniqueId = activeMob.getUniqueId();
 
-        if (!bossConfigs.containsKey(mobInternalName.toUpperCase())) {
-            getLogger().info("Boss " + mobInternalName + " not found in configuration. Ignoring.");
-            return;
-        }
-
         BossConfig bossConfig = bossConfigs.get(mobInternalName.toUpperCase());
         if (bossConfig == null) {
             getLogger().info("Using default configuration for boss: " + mobInternalName);
@@ -274,12 +269,12 @@ public class DamageTracker extends JavaPlugin implements Listener, CommandExecut
         String enableMessage = String.format("%s v%s has been enabled!", pluginName, version);
 
         String[] asciiArt = {
-            "§9______  §f_    _§9______ ",
-            "§9| ___ \\§f| |  | |§9 ___ \\",
-            "§9| |_/ /§f| |  | |§9 |_/ /",
-            "§9| ___ \\§f| |/\\| |§9 ___ \\",
-            "§9| |_/ /§f\\  /\\  /§9 |_/ /",
-            "§9\\____/  §f\\/  \\/§9\\____/ "
+            " ____                                  _____               _             ",
+            "|  _ \\  __ _ _ __ ___   __ _  __ _  __|_   _| __ __ _  ___| | _____ _ __",
+            "| | | |/ _` | '_ ` _ \\ / _` |/ _` |/ _ \\| || '__/ _` |/ __| |/ / _ \\ '__|",
+            "| |_| | (_| | | | | | | (_| | (_| |  __/| || | | (_| | (__|   <  __/ |  ",
+            "|____/ \\__,_|_| |_| |_|\\__,_|\\__, |\\___|_||_|  \\__,_|\\___|_|\\_\\___|_|  ",
+            "                             |___/                                      "
         };
 
         int maxAsciiWidth = Arrays.stream(asciiArt).mapToInt(String::length).max().orElse(0);
