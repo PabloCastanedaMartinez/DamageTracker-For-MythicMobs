@@ -26,14 +26,19 @@ public class DamageTracker extends JavaPlugin implements Listener, CommandExecut
     private BossConfig defaultBossConfig;
     private Map<UUID, Double> bossMaxHealth;
     private String damageFormat;
+    private String percentageFormat;
 
     private static class BossConfig {
         String victoryMessage;
         int topPlayersToShow;
+        List<String> topPlayersFormat;
+        String damageDisplay;
 
-        BossConfig(String victoryMessage, int topPlayersToShow) {
+        BossConfig(String victoryMessage, int topPlayersToShow, List<String> topPlayersFormat, String damageDisplay) {
             this.victoryMessage = victoryMessage;
             this.topPlayersToShow = topPlayersToShow;
+            this.topPlayersFormat = topPlayersFormat;
+            this.damageDisplay = damageDisplay;
         }
     }
 
@@ -62,7 +67,9 @@ public class DamageTracker extends JavaPlugin implements Listener, CommandExecut
                 if (bossSection != null && !bossSection.getKeys(false).isEmpty()) {
                     String victoryMessage = bossSection.getString("victory_message");
                     int topPlayersToShow = bossSection.getInt("top_players_to_show", 3);
-                    bossConfigs.put(bossName.toUpperCase(), new BossConfig(victoryMessage, topPlayersToShow));
+                    List<String> topPlayersFormat = bossSection.getStringList("top_players_format");
+                    String damageDisplay = bossSection.getString("damage_display", "percentage");
+                    bossConfigs.put(bossName.toUpperCase(), new BossConfig(victoryMessage, topPlayersToShow, topPlayersFormat, damageDisplay));
                 } else {
                     bossConfigs.put(bossName.toUpperCase(), null);
                 }
@@ -73,10 +80,13 @@ public class DamageTracker extends JavaPlugin implements Listener, CommandExecut
         if (defaultSection != null) {
             String defaultVictoryMessage = defaultSection.getString("victory_message");
             int defaultTopPlayersToShow = defaultSection.getInt("top_players_to_show", 3);
-            defaultBossConfig = new BossConfig(defaultVictoryMessage, defaultTopPlayersToShow);
+            List<String> defaultTopPlayersFormat = defaultSection.getStringList("top_players_format");
+            String defaultDamageDisplay = defaultSection.getString("damage_display", "percentage");
+            defaultBossConfig = new BossConfig(defaultVictoryMessage, defaultTopPlayersToShow, defaultTopPlayersFormat, defaultDamageDisplay);
         }
 
         damageFormat = getConfig().getString("damage_format", "%.2f");
+        percentageFormat = getConfig().getString("percentage_format", "%.1f%%");
         getLogger().info("Configuration loaded. Number of configured bosses: " + bossConfigs.size());
     }
 
@@ -173,6 +183,10 @@ public class DamageTracker extends JavaPlugin implements Listener, CommandExecut
         String mobInternalName = activeMob.getMobType();
         UUID mobUniqueId = activeMob.getUniqueId();
 
+        if (!bossConfigs.containsKey(mobInternalName.toUpperCase())) {
+            return;
+        }
+
         BossConfig bossConfig = bossConfigs.get(mobInternalName.toUpperCase());
         if (bossConfig == null) {
             getLogger().info("Using default configuration for boss: " + mobInternalName);
@@ -191,16 +205,22 @@ public class DamageTracker extends JavaPlugin implements Listener, CommandExecut
             .replace("{boss_name}", activeMob.getDisplayName());
 
         StringBuilder topPlayersMessage = new StringBuilder();
-        String[] positions = {"&aPrimer puesto: ", "&eSegundo puesto: ", "&6Tercer puesto: ", "&bCuarto puesto: ", "&dQuinto puesto: "};
+        double maxHealth = bossMaxHealth.getOrDefault(mobUniqueId, 0.0);
         for (int i = 0; i < Math.min(bossConfig.topPlayersToShow, topPlayers.size()); i++) {
             Map.Entry<UUID, Double> entry = topPlayers.get(i);
             Player player = Bukkit.getPlayer(entry.getKey());
             if (player != null) {
-                String positionPrefix = i < positions.length ? positions[i] : "&7" + (i + 1) + "º puesto: ";
-                topPlayersMessage.append(positionPrefix)
-                   .append("&7").append(player.getName())
-                   .append(" &c").append(String.format(damageFormat, entry.getValue()))
-                   .append("\n");
+                String format = i < bossConfig.topPlayersFormat.size() ? bossConfig.topPlayersFormat.get(i) : "&7{player_name}: &c{damage}";
+                String damageString;
+                if ("percentage".equalsIgnoreCase(bossConfig.damageDisplay) && maxHealth > 0) {
+                    double percentage = (entry.getValue() / maxHealth) * 100;
+                    damageString = String.format(percentageFormat, percentage);
+                } else {
+                    damageString = String.format(damageFormat, entry.getValue());
+                }
+                format = format.replace("{player_name}", player.getName())
+                               .replace("{damage}", damageString);
+                topPlayersMessage.append(format).append("\n");
             }
         }
         message = message.replace("{top_players}", topPlayersMessage.toString());
@@ -264,9 +284,8 @@ public class DamageTracker extends JavaPlugin implements Listener, CommandExecut
     }
 
     private void displayAsciiArt() {
-        String pluginName = "DamageTracker for MythicMobs";
         String version = getDescription().getVersion();
-        String enableMessage = String.format("%s v%s has been enabled!", pluginName, version);
+        String enableMessage = String.format("v%s has been enabled!", version);
 
         String[] asciiArt = {
             " ____                                  _____               _             ",
