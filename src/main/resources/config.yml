@@ -1,38 +1,53 @@
 bosses:
-  WARDEN_ANCIANO:
+  Example:
     victory_message: |
       &6=================================================
-      &6¡El &4Warden Anciano &7ha sido derrotado!
-      &eLos mejores luchadores fueron:
+      &6The &4Boss &7has been defeated!
+      &eThe top fighters were:
       {top_players}
       &6=================================================
     top_players_to_show: 3
-  
-  Darkin:
+    top_players_format:
+      - "&aFirst place: &7{player_name} &c{damage}"
+      - "&eSecond place: &7{player_name} &c{damage}"
+      - "&6Third place: &7{player_name} &c{damage}"
+    damage_display: "percentage"  # Can be "percentage" or "numeric"
+
+  example_boss2:
     victory_message: |
       &4=================================================
-      &4¡El temible &cDarkin &4ha caído!
-      &cLos campeones más poderosos:
+      &4The fearsome &cBoss &4has fallen!
+      &cThe most powerful champions:
       {top_players}
       &4=================================================
     top_players_to_show: 5
- 
-  
-  SKELETONKING: {}
-  
-  XERATH: {}
-  
-  JEFE_EJEMPLO: {}
+    top_players_format:
+      - "&4★ &cSupreme Champion: &7{player_name} &8- &4{damage}"
+      - "&c☆ &7Second strongest: &7{player_name} &8- &c{damage}"
+      - "&6☆ &7Third strongest: &7{player_name} &8- &6{damage}"
+      - "&e☆ &7Fourth strongest: &7{player_name} &8- &e{damage}"
+      - "&7☆ &7Fifth strongest: &7{player_name} &8- &7{damage}"
+    damage_display: "numeric"  # Can be "percentage" or "numeric"
 
-# Configuración por defecto para jefes especificados sin configuración completa
+
+  EXAMPLE_BOSS3: {}
+
+
+# Default configuration for bosses with incomplete configuration
 default_boss_config:
   victory_message: |
     &6=================================================
-    &6¡El jefe &4{boss_name} &7ha sido derrotado!
-    &eLos mejores luchadores fueron:
+    &6The boss {boss_name} has been defeated!
+    &eThe top fighters were:
     {top_players}
     &6=================================================
   top_players_to_show: 3
+  top_players_format:
+    - "&aFirst place: &7{player_name} &c{damage}"
+    - "&eSecond place: &7{player_name} &c{damage}"
+    - "&6Third place: &7{player_name} &c{damage}"
+  damage_display: "percentage"  # Can be "percentage" or "numeric"
 
-# Formato para mostrar el daño (usa la sintaxis de String.format)
+# Format for displaying damage (uses String.format syntax)
 damage_format: "%.2f"
+percentage_format: "%.1f%%"
