@@ -19,12 +19,12 @@ public class DamageTrackerPlaceholder extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getIdentifier() {
-        return "damagetracker";
+        return "damagetracker_for_mythicmobs";
     }
 
     @Override
     public @NotNull String getAuthor() {
-        return "TuNombre";
+        return "ElPlatano0871";
     }
 
     @Override
