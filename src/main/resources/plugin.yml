@@ -1,4 +1,4 @@
-name: DamageTracker
+name: DamageTracker_For_MythicMobs
 version: '${project.version}'
 main: com.elplatano0871.damagetracker.DamageTracker
 api-version: '1.21'
