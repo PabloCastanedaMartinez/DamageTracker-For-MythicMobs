@@ -6,7 +6,7 @@
 
     <groupId>com.elplatano0871</groupId>
     <artifactId>DamageTracker_for_MythicMobs</artifactId>
-    <version>1.0-RELEASE</version>
+    <version>1.0.1-RELEASE</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
