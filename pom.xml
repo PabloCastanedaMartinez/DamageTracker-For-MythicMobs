@@ -45,7 +45,7 @@
         <dependency>
             <groupId>io.lumine</groupId>
             <artifactId>Mythic-Dist</artifactId>
-            <version>[5.7.0,5.7.2]</version>
+            <version>[5.5.0,5.7.2]</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
