@@ -1,33 +1,33 @@
 bosses:
   Example:
     victory_message: |
-      &6=================================================
-      &6The &4Boss &7has been defeated!
-      &eThe top fighters were:
+      <gradient:gold:yellow>=================================================
+      <rainbow>The Boss has been defeated!</rainbow>
+      <green>The top fighters were:
       {top_players}
-      &6=================================================
+      <gradient:gold:yellow>=================================================
     top_players_to_show: 3
     top_players_format:
-      - "&aFirst place: &7{player_name} &c{damage}"
-      - "&eSecond place: &7{player_name} &c{damage}"
-      - "&6Third place: &7{player_name} &c{damage}"
-    damage_display: "percentage"  # Can be "percentage" or "numeric"
+      - "<gradient:green:lime>First place: {prefix}<white>{player_name} <red>{damage}"
+      - "<gradient:yellow:gold>Second place: {prefix}<white>{player_name} <red>{damage}"
+      - "<gradient:orange:red>Third place: {prefix}<white>{player_name} <red>{damage}"
+    damage_display: "percentage"
 
   example_boss2:
     victory_message: |
-      &4=================================================
-      &4The fearsome &cBoss &4has fallen!
-      &cThe most powerful champions:
+      &#FF0000=================================================
+      &#FF4500The fearsome &#FF6347Boss &#FF0000has fallen!
+      &#FF6347The most powerful champions:
       {top_players}
-      &4=================================================
+      &#FF0000=================================================
     top_players_to_show: 5
     top_players_format:
-      - "&4★ &cSupreme Champion: &7{player_name} &8- &4{damage}"
-      - "&c☆ &7Second strongest: &7{player_name} &8- &c{damage}"
-      - "&6☆ &7Third strongest: &7{player_name} &8- &6{damage}"
-      - "&e☆ &7Fourth strongest: &7{player_name} &8- &e{damage}"
-      - "&7☆ &7Fifth strongest: &7{player_name} &8- &7{damage}"
-    damage_display: "numeric"  # Can be "percentage" or "numeric"
+      - "&#FF0000★ &#FF4500Supreme Champion: &#FFFFFF{player_name} &#808080- &#FF0000{damage}"
+      - "&#FF4500☆ &#FFFFFFSecond strongest: &#FFFFFF{player_name} &#808080- &#FF4500{damage}"
+      - "&#FFA500☆ &#FFFFFFThird strongest: &#FFFFFF{player_name} &#808080- &#FFA500{damage}"
+      - "&#FFD700☆ &#FFFFFFFourth strongest: &#FFFFFF{player_name} &#808080- &#FFD700{damage}"
+      - "&#C0C0C0☆ &#FFFFFFFifth strongest: &#FFFFFF{player_name} &#808080- &#C0C0C0{damage}"
+    damage_display: "numeric"
 
 
   EXAMPLE_BOSS3: {}
@@ -51,3 +51,5 @@ default_boss_config:
 # Format for displaying damage (uses String.format syntax)
 damage_format: "%.2f"
 percentage_format: "%.1f%%"
+
+personal_message_format: "&6Your contribution: &ePosition: {position}, Damage: {damage} ({percentage}%)"
