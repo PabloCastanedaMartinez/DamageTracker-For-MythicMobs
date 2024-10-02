@@ -3,6 +3,7 @@ version: '${project.version}'
 main: com.elplatano0871.damagetracker.DamageTracker
 api-version: '1.19'
 depend: [MythicMobs, PlaceholderAPI]
+softdepend: [Vault, LuckPerms]
 
 commands:
   damagetracker:
