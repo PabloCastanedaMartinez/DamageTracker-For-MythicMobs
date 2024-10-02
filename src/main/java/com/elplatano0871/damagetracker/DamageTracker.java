@@ -1,5 +1,9 @@
 package com.elplatano0871.damagetracker;
 
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -16,17 +20,28 @@ import io.lumine.mythic.core.mobs.ActiveMob;
 import io.lumine.mythic.bukkit.events.MythicMobDeathEvent;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.command.TabCompleter;
+import net.milkbowl.vault.chat.Chat;
+import net.luckperms.api.LuckPerms;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DamageTracker extends JavaPlugin implements Listener, CommandExecutor, TabCompleter {
 
+    private BukkitAudiences adventure;
+    private MiniMessage miniMessage;
     private Map<UUID, Map<UUID, Double>> bossDamageMaps;
     private Map<String, BossConfig> bossConfigs;
     private BossConfig defaultBossConfig;
     private Map<UUID, Double> bossMaxHealth;
     private String damageFormat;
     private String percentageFormat;
+    private boolean useVault;
+    private boolean useLuckPerms;
+    private Chat vaultChat;
+    private LuckPerms luckPerms;
+    private String personalMessageFormat;
 
     private static class BossConfig {
         String victoryMessage;
@@ -52,8 +67,101 @@ public class DamageTracker extends JavaPlugin implements Listener, CommandExecut
         new DamageTrackerPlaceholder(this).register();
         getCommand("damagetracker").setExecutor(this);
         getCommand("damagetracker").setTabCompleter(this);
+        this.adventure = BukkitAudiences.create(this);
+        this.miniMessage = MiniMessage.miniMessage();
+        setupVault();
+        setupLuckPerms();
+        personalMessageFormat = getConfig().getString("personal_message_format",
+            "&6Your contribution: &ePosition: {position}, Damage: {damage} ({percentage}%)");
         
         displayAsciiArt();
+    }
+
+    @Override
+    public void onDisable() {
+        if (this.adventure != null) {
+            this.adventure.close();
+            this.adventure = null;
+        }
+    }
+
+    private String convertLegacyAndHexToMiniMessage(String input) {
+        // Convert legacy color codes
+        String result = ChatColor.translateAlternateColorCodes('&', input);
+        
+        // Convert hex color codes
+        Pattern hexPattern = Pattern.compile("&#([A-Fa-f0-9]{6})");
+        Matcher matcher = hexPattern.matcher(result);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            matcher.appendReplacement(sb, "<#$1>");
+        }
+        matcher.appendTail(sb);
+        result = sb.toString();
+        
+        // Convert legacy color codes to MiniMessage format
+        result = result.replace("§0", "<black>")
+                       .replace("§1", "<dark_blue>")
+                       .replace("§2", "<dark_green>")
+                       .replace("§3", "<dark_aqua>")
+                       .replace("§4", "<dark_red>")
+                       .replace("§5", "<dark_purple>")
+                       .replace("§6", "<gold>")
+                       .replace("§7", "<gray>")
+                       .replace("§8", "<dark_gray>")
+                       .replace("§9", "<blue>")
+                       .replace("§a", "<green>")
+                       .replace("§b", "<aqua>")
+                       .replace("§c", "<red>")
+                       .replace("§d", "<light_purple>")
+                       .replace("§e", "<yellow>")
+                       .replace("§f", "<white>")
+                       .replace("§l", "<bold>")
+                       .replace("§m", "<strikethrough>")
+                       .replace("§n", "<underline>")
+                       .replace("§o", "<italic>")
+                       .replace("§r", "<reset>");
+        
+        return result;
+    }
+
+    private void sendMessage(Player player, String message) {
+        message = convertLegacyAndHexToMiniMessage(message);
+        Component component = miniMessage.deserialize(message);
+        adventure.player(player).sendMessage(component);
+    }
+
+    private void setupVault() {
+        if (getServer().getPluginManager().getPlugin("Vault") != null) {
+            org.bukkit.plugin.RegisteredServiceProvider<Chat> rsp = getServer().getServicesManager().getRegistration(Chat.class);
+            if (rsp != null) {
+                vaultChat = rsp.getProvider();
+                useVault = true;
+                getLogger().info("Vault integration enabled.");
+            }
+        }
+    }
+
+    private void setupLuckPerms() {
+        org.bukkit.plugin.RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
+        if (provider != null) {
+            luckPerms = provider.getProvider();
+            useLuckPerms = true;
+            getLogger().info("LuckPerms integration enabled.");
+        }
+    }
+
+    private String getPlayerPrefix(Player player) {
+        String prefix = "";
+        if (useVault && vaultChat != null) {
+            prefix = vaultChat.getPlayerPrefix(player);
+        } else if (useLuckPerms && luckPerms != null) {
+            net.luckperms.api.model.user.User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+            if (user != null) {
+                prefix = user.getCachedData().getMetaData().getPrefix();
+            }
+        }
+        return prefix.replaceAll("§([0-9a-fk-or])", "<$1>");
     }
 
     private void loadConfig() {
@@ -201,36 +309,64 @@ public class DamageTracker extends JavaPlugin implements Listener, CommandExecut
         Map<UUID, Double> bossDamageMap = bossDamageMaps.getOrDefault(mobUniqueId, new HashMap<>());
         List<Map.Entry<UUID, Double>> topPlayers = getTopDamage(bossDamageMap, bossConfig.topPlayersToShow);
 
-        String message = bossConfig.victoryMessage
-            .replace("{boss_name}", activeMob.getDisplayName());
-
         StringBuilder topPlayersMessage = new StringBuilder();
         double maxHealth = bossMaxHealth.getOrDefault(mobUniqueId, 0.0);
+        double totalDamage = bossDamageMap.values().stream().mapToDouble(Double::doubleValue).sum();
+
         for (int i = 0; i < Math.min(bossConfig.topPlayersToShow, topPlayers.size()); i++) {
             Map.Entry<UUID, Double> entry = topPlayers.get(i);
             Player player = Bukkit.getPlayer(entry.getKey());
             if (player != null) {
-                String format = i < bossConfig.topPlayersFormat.size() ? bossConfig.topPlayersFormat.get(i) : "&7{player_name}: &c{damage}";
-                String damageString;
-                if ("percentage".equalsIgnoreCase(bossConfig.damageDisplay) && maxHealth > 0) {
-                    double percentage = (entry.getValue() / maxHealth) * 100;
-                    damageString = String.format(percentageFormat, percentage);
-                } else {
-                    damageString = String.format(damageFormat, entry.getValue());
-                }
+                String format = i < bossConfig.topPlayersFormat.size() ? bossConfig.topPlayersFormat.get(i) : "<gray>{player_name}: <red>{damage}";
+                String damageString = formatDamage(entry.getValue(), maxHealth, bossConfig.damageDisplay);
+                String prefix = getPlayerPrefix(player);
+                prefix = prefix.replaceAll("§([0-9a-fk-or])", "<$1>");
                 format = format.replace("{player_name}", player.getName())
-                               .replace("{damage}", damageString);
+                               .replace("{damage}", damageString)
+                               .replace("{prefix}", prefix);
                 topPlayersMessage.append(format).append("\n");
             }
         }
-        message = message.replace("{top_players}", topPlayersMessage.toString());
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+        String message = bossConfig.victoryMessage
+        .replace("{boss_name}", activeMob.getDisplayName())
+        .replace("{top_players}", topPlayersMessage.toString());
+    
+    for (Player player : Bukkit.getOnlinePlayers()) {
+        sendMessage(player, message);
+    }
+
+        // Send personal messages to all participants
+        List<Map.Entry<UUID, Double>> sortedDamageList = new ArrayList<>(bossDamageMap.entrySet());
+        sortedDamageList.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
+
+        for (int i = 0; i < sortedDamageList.size(); i++) {
+            Map.Entry<UUID, Double> entry = sortedDamageList.get(i);
+            Player player = Bukkit.getPlayer(entry.getKey());
+            if (player != null) {
+                double damage = entry.getValue();
+                double percentage = (damage / totalDamage) * 100;
+                String personalMessage = personalMessageFormat
+                .replace("{position}", String.valueOf(i + 1))
+                .replace("{damage}", formatDamage(damage, maxHealth, "numeric"))
+                .replace("{percentage}", String.format("%.2f", percentage));
+            personalMessage = personalMessage.replaceAll("§([0-9a-fk-or])", "<$1>");
+            sendMessage(player, personalMessage);
+            }
         }
         
         bossDamageMaps.remove(mobUniqueId);
         bossMaxHealth.remove(mobUniqueId);
+    }
+
+
+    private String formatDamage(double damage, double maxHealth, String displayType) {
+        if ("percentage".equalsIgnoreCase(displayType) && maxHealth > 0) {
+            double percentage = (damage / maxHealth) * 100;
+            return String.format(percentageFormat, percentage);
+        } else {
+            return String.format(damageFormat, damage);
+        }
     }
 
     @EventHandler
@@ -297,7 +433,6 @@ public class DamageTracker extends JavaPlugin implements Listener, CommandExecut
         };
 
         int maxAsciiWidth = Arrays.stream(asciiArt).mapToInt(String::length).max().orElse(0);
-        int padding = 2;
 
         for (int i = 0; i < asciiArt.length; i++) {
             StringBuilder line = new StringBuilder(asciiArt[i]);
