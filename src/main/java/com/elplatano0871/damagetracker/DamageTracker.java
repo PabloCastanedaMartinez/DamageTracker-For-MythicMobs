@@ -103,10 +103,26 @@ public class DamageTracker extends JavaPlugin {
             for (String bossName : bossesSection.getKeys(false)) {
                 var bossSection = bossesSection.getConfigurationSection(bossName);
                 if (bossSection != null && !bossSection.getKeys(false).isEmpty()) {
+                    List<List<String>> rewards = new ArrayList<>();
+
+                    // Ödülleri konfigürasyondan çek
+                    if (bossSection.contains("rewards")) {
+                        var rewardsSection = bossSection.getList("rewards");
+                        if (rewardsSection != null) {
+                            for (Object rewardObj : rewardsSection) {
+                                if (rewardObj instanceof List) {
+                                    List<String> rewardList = (List<String>) rewardObj;
+                                    rewards.add(rewardList);
+                                }
+                            }
+                        }
+                    }
+
                     bossConfigs.put(bossName.toUpperCase(), new BossConfig(
-                        bossSection.getString("victory_message"),
-                        bossSection.getInt("top_players_to_show", 3),
-                        bossSection.getStringList("top_players_format")
+                            bossSection.getString("victory_message"),
+                            bossSection.getInt("top_players_to_show", 3),
+                            bossSection.getStringList("top_players_format"),
+                            rewards
                     ));
                 } else {
                     bossConfigs.put(bossName.toUpperCase(), null);
@@ -115,6 +131,8 @@ public class DamageTracker extends JavaPlugin {
         }
         getLogger().info("Configuration loaded. Number of configured bosses: " + bossConfigs.size());
     }
+
+
 
     private void loadDefaultConfig() {
         var defaultSection = getConfig().getConfigurationSection("default_boss_config");
@@ -190,6 +208,7 @@ public class DamageTracker extends JavaPlugin {
         }
         return "";
     }
+
 
     // Métodos delegados al DamageManager
     public void addDamage(UUID bossId, Player player, double damage) {

@@ -41,7 +41,7 @@ public class MythicMobListeners implements Listener {
 
         Map<UUID, Double> bossDamageMap = plugin.getBossDamageMap(mobUniqueId);
         List<Map.Entry<UUID, Double>> topPlayers = plugin.getTopDamage(bossDamageMap, bossConfig.topPlayersToShow);
-        
+
         StringBuilder topPlayersMessage = new StringBuilder();
         double maxHealth = plugin.getBossMaxHealth(mobUniqueId);
         double totalDamage = bossDamageMap.values().stream().mapToDouble(Double::doubleValue).sum();
@@ -50,35 +50,42 @@ public class MythicMobListeners implements Listener {
             Map.Entry<UUID, Double> entry = topPlayers.get(i);
             Player player = Bukkit.getPlayer(entry.getKey());
             if (player != null) {
-                String format = i < bossConfig.topPlayersFormat.size() ? 
-                    bossConfig.topPlayersFormat.get(i) : 
-                    "<gray>{player_name}: {damage} ({percentage}%)";
-                    
+                String format = i < bossConfig.topPlayersFormat.size() ?
+                        bossConfig.topPlayersFormat.get(i) :
+                        "<gray>{player_name}: {damage} ({percentage}%)";
+
                 String damageStr = plugin.formatDamage(entry.getValue(), maxHealth, "numeric");
                 double percentage = (entry.getValue() / totalDamage) * 100;
                 String percentageStr = String.format(plugin.percentageFormat, percentage);
-                
+
                 String prefix = plugin.getPlayerPrefix(player);
                 prefix = prefix.replaceAll("§([0-9a-fk-or])", "<$1>");
-                
+
                 format = format.replace("{player_name}", player.getName())
-                             .replace("{damage}", damageStr)
-                             .replace("{percentage}", percentageStr)
-                             .replace("{prefix}", prefix);
-                             
+                        .replace("{damage}", damageStr)
+                        .replace("{percentage}", percentageStr)
+                        .replace("{prefix}", prefix);
+
                 topPlayersMessage.append(format).append("\n");
+
+                // Ödülleri oyunculara gönder
+                List<String> rewards = bossConfig.getRewardsForPosition(i);
+                for (String rewardCommand : rewards) {
+                    String finalCommand = rewardCommand.replace("{player_name}", player.getName());
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand);
+                }
             }
         }
 
         String message = bossConfig.victoryMessage
-            .replace("{boss_name}", activeMob.getDisplayName())
-            .replace("{top_players}", topPlayersMessage.toString());
+                .replace("{boss_name}", activeMob.getDisplayName())
+                .replace("{top_players}", topPlayersMessage.toString());
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             MessageUtils.sendMessage(player, message);
         }
 
-        // Handle personal messages
+        // Kişisel mesajlar
         List<Map.Entry<UUID, Double>> sortedDamageList = new ArrayList<>(bossDamageMap.entrySet());
         sortedDamageList.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
 
@@ -89,15 +96,16 @@ public class MythicMobListeners implements Listener {
                 double damage = entry.getValue();
                 double percentage = (damage / totalDamage) * 100;
                 String personalMessage = plugin.getPersonalMessageFormat()
-                    .replace("{position}", String.valueOf(i + 1))
-                    .replace("{damage}", plugin.formatDamage(damage, maxHealth, "numeric"))
-                    .replace("{percentage}", String.format(plugin.percentageFormat, percentage));
+                        .replace("{position}", String.valueOf(i + 1))
+                        .replace("{damage}", plugin.formatDamage(damage, maxHealth, "numeric"))
+                        .replace("{percentage}", String.format(plugin.percentageFormat, percentage));
                 MessageUtils.sendMessage(player, personalMessage);
             }
         }
 
         plugin.removeBossData(mobUniqueId);
     }
+
 
     @EventHandler
     public void onMythicMobDamage(EntityDamageByEntityEvent event) {

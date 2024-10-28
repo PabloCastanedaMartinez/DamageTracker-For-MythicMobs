@@ -7,6 +7,7 @@ public class BossConfig {
     public String victoryMessage;
     public int topPlayersToShow;
     public List<String> topPlayersFormat;
+    public List<List<String>> rewards; // Her oyuncu için ödüller
 
     /**
      * Constructor for BossConfig with all parameters
@@ -19,6 +20,15 @@ public class BossConfig {
         this.victoryMessage = victoryMessage;
         this.topPlayersToShow = topPlayersToShow;
         this.topPlayersFormat = topPlayersFormat != null ? new ArrayList<>(topPlayersFormat) : new ArrayList<>();
+
+    }
+
+    public BossConfig(String victoryMessage, int topPlayersToShow, List<String> topPlayersFormat,List<List<String>> rewards) {
+        this.victoryMessage = victoryMessage;
+        this.topPlayersToShow = topPlayersToShow;
+        this.topPlayersFormat = topPlayersFormat != null ? new ArrayList<>(topPlayersFormat) : new ArrayList<>();
+        this.rewards = rewards != null ? new ArrayList<>(rewards) : new ArrayList<>();
+
     }
 
     /**
@@ -137,12 +147,27 @@ public class BossConfig {
         }
     }
 
+    public List<String> getRewardsForPosition(int position) {
+        if (position >= 0 && position < rewards.size()) {
+            return rewards.get(position);
+        }
+        return new ArrayList<>(); // Return empty list if no rewards found
+    }
+
+    public void setRewardsForPosition(int position, List<String> rewards) {
+        while (this.rewards.size() <= position) {
+            this.rewards.add(new ArrayList<>());
+        }
+        this.rewards.set(position, rewards != null ? new ArrayList<>(rewards) : new ArrayList<>());
+    }
+
     @Override
     public String toString() {
         return "BossConfig{" +
                 "victoryMessage='" + victoryMessage + '\'' +
                 ", topPlayersToShow=" + topPlayersToShow +
                 ", topPlayersFormat=" + topPlayersFormat +
+                ", rewards=" + rewards +
                 '}';
     }
 }
