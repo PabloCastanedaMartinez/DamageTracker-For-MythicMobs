@@ -10,7 +10,9 @@ import org.bukkit.entity.Player;
 public class MessageUtils {
     private static final MiniMessage miniMessage = MiniMessage.miniMessage();
     private static BukkitAudiences adventure;
-
+    private static final int CHAT_WIDTH = 320; // Minecraft's chat width in pixels
+    private static final int SPACE_WIDTH = 4; // Width of a space character in pixels
+    
     public static void init(DamageTracker plugin) {
         adventure = BukkitAudiences.create(plugin);
     }
@@ -38,10 +40,93 @@ public class MessageUtils {
         }
         try {
             String convertedMessage = convertLegacyAndHexToMiniMessage(message);
+            // Process centered tags before MiniMessage deserialization
+            convertedMessage = processCenteredTags(convertedMessage);
             return miniMessage.deserialize(convertedMessage);
         } catch (Exception e) {
             return Component.text(message);
         }
+    }
+
+    private static String processCenteredTags(String input) {
+        StringBuilder result = new StringBuilder();
+        int lastIndex = 0;
+        
+        while (true) {
+            int startTag = input.indexOf("<centered>", lastIndex);
+            if (startTag == -1) {
+                result.append(input.substring(lastIndex));
+                break;
+            }
+            
+            int endTag = input.indexOf("</centered>", startTag);
+            if (endTag == -1) {
+                result.append(input.substring(lastIndex));
+                break;
+            }
+            
+            // Add text before the tag
+            result.append(input.substring(lastIndex, startTag));
+            
+            // Get the text to be centered
+            String textToCenter = input.substring(startTag + 10, endTag);
+            
+            // Center the text and add it
+            result.append(centerText(textToCenter));
+            
+            lastIndex = endTag + 11; // 11 is length of "</centered>"
+        }
+        
+        return result.toString();
+    }
+
+    private static String centerText(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+
+        // Calculate the width of the text (excluding color codes)
+        int messageWidth = getMessageWidth(stripColor(text));
+        
+        // Calculate needed spaces before the message
+        int spacesBefore = (CHAT_WIDTH - messageWidth) / (2 * SPACE_WIDTH);
+        
+        // Create the spaces prefix
+        StringBuilder spaces = new StringBuilder();
+        for (int i = 0; i < spacesBefore; i++) {
+            spaces.append(" ");
+        }
+        
+        return spaces + text;
+    }
+
+    private static int getMessageWidth(String message) {
+        int width = 0;
+        for (char c : message.toCharArray()) {
+            width += getCharWidth(c);
+        }
+        return width;
+    }
+
+    private static int getCharWidth(char c) {
+        // Simplified character width calculation
+        // In a real implementation, you might want to have a more complete mapping
+        if (c >= '!' && c <= '~') {
+            return 6; // Most standard characters
+        } else if (c == ' ') {
+            return SPACE_WIDTH;
+        }
+        return 7; // Default for other characters
+    }
+
+    private static String stripColor(String input) {
+        // Remove legacy color codes
+        input = input.replaceAll("§[0-9a-fk-or]", "");
+        // Remove MiniMessage tags
+        input = input.replaceAll("<[^>]*>", "");
+        // Remove hex color codes
+        input = input.replaceAll("&#[A-Fa-f0-9]{6}", "");
+        return input;
     }
 
     public static String convertLegacyAndHexToMiniMessage(String input) {
