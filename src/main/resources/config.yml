@@ -12,6 +12,10 @@ bosses:
       - "<gradient:dark_green:green>First place: {prefix}<white>{player_name} <red>({damage} | {percentage}%)"
       - "<gradient:yellow:gold>Second place: {prefix}<white>{player_name} <red>({damage} | {percentage}%)"
       - "<gradient:#ff8000:red>Third place: {prefix}<white>{player_name} <red>({damage} | {percentage}%)"
+    rewards:
+      - [ "give {player_name} minecraft:diamond 5", "give {player_name} minecraft:gold_ingot 10" ] # 1st place rewards
+      - [ "give {player_name} minecraft:iron_ingot 15" ] # 2nd place rewards
+      - [ "give {player_name} minecraft:coal 20" ] # 3rd place rewards
 
 # Example boss configuration using legacy color codes
   example_boss2:
@@ -28,6 +32,10 @@ bosses:
       - "&#FFA500☆ &#FFFFFFThird strongest: &#FFFFFF{player_name} &#808080- ({damage} | {percentage}%)"
       - "&#FFD700☆ &#FFFFFFFourth strongest: &#FFFFFF{player_name} &#808080- ({damage} | {percentage}%)"
       - "&#C0C0C0☆ &#FFFFFFFifth strongest: &#FFFFFF{player_name} &#808080- ({damage} | {percentage}%)"
+    rewards:
+      - [ "give {player_name} minecraft:diamond 5", "give {player_name} minecraft:gold_ingot 10" ] # 1st place rewards
+      - [ "give {player_name} minecraft:iron_ingot 15" ] # 2nd place rewards
+      - [ "give {player_name} minecraft:coal 20" ] # 3rd place rewards
 
 # Bosses with this format willuse default configuration
   EXAMPLE_BOSS3: {}
@@ -45,6 +53,10 @@ default_boss_config:
     - "&aFirst place: {prefix}&7{player_name} &c({damage} | {percentage}%)"
     - "&eSecond place: {prefix}&7{player_name} &c({damage} | {percentage}%)"
     - "&6Third place: {prefix}&7{player_name} &c({damage} | {percentage}%)"
+  rewards:
+    - [ "give {player_name} minecraft:diamond 5", "give {player_name} minecraft:gold_ingot 10" ] # 1st place rewards
+    - [ "give {player_name} minecraft:iron_ingot 15" ] # 2nd place rewards
+    - [ "give {player_name} minecraft:coal 20" ] # 3rd place rewards
 
 # Format for displaying damage values
 damage_format: "%.2f"
