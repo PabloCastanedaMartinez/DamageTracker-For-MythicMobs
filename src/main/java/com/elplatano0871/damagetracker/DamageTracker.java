@@ -22,45 +22,61 @@ public class DamageTracker extends JavaPlugin {
     public String damageFormat;
     public String percentageFormat;
 
-
     @Override
     public void onEnable() {
+        // Initialize boss configurations
         bossConfigs = new HashMap<>();
+        // Load configuration from file
         loadConfig();
+        // Initialize the damage manager
         initializeDamageManager();
+        // Initialize message utilities
         MessageUtils.init(this); 
+        // Register event handlers and commands
         registerHandlers();
+        // Setup integrations with other plugins
         setupIntegrations();
+        // Display ASCII art in the console
         displayAsciiArt();
     }
 
     @Override
     public void onDisable() {
+        // Close message utilities
         MessageUtils.close(); 
     }
 
     private void initializeDamageManager() {
+        // Get damage and percentage formats from config
         String damageFormat = getConfig().getString("damage_format", "%.2f");
         String percentageFormat = getConfig().getString("percentage_format", "%.1f%%");
+        // Initialize the damage manager with the formats
         this.damageManager = new DamageManager(damageFormat, percentageFormat);
     }
 
     private void registerHandlers() {
+        // Register event listeners
         getServer().getPluginManager().registerEvents(new MythicMobListeners(this), this);
+        // Register placeholder
         new DamageTrackerPlaceholder(this).register();
         
+        // Register command handler
         DamageTrackerCommand commandHandler = new DamageTrackerCommand(this);
         getCommand("damagetracker").setExecutor(commandHandler);
         getCommand("damagetracker").setTabCompleter(commandHandler);
     }
 
     private void setupIntegrations() {
+        // Setup Vault integration
         setupVault();
+        // Setup LuckPerms integration
         setupLuckPerms();
     }
 
     private void setupVault() {
+        // Check if Vault plugin is available
         if (getServer().getPluginManager().getPlugin("Vault") != null) {
+            // Get Vault chat provider
             org.bukkit.plugin.RegisteredServiceProvider<Chat> rsp = getServer().getServicesManager().getRegistration(Chat.class);
             if (rsp != null) {
                 vaultChat = rsp.getProvider();
@@ -71,6 +87,7 @@ public class DamageTracker extends JavaPlugin {
     }
 
     private void setupLuckPerms() {
+        // Get LuckPerms provider
         org.bukkit.plugin.RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
         if (provider != null) {
             luckPerms = provider.getProvider();
@@ -80,35 +97,47 @@ public class DamageTracker extends JavaPlugin {
     }
 
     public void loadConfig() {
+        // Save default config if not present
         saveDefaultConfig();
+        // Reload config from file
         reloadConfig();
+        // Clear existing boss configurations
         bossConfigs.clear();
+        // Load formats from config
         loadFormats();
+        // Load boss configurations from config
         loadBossConfigs();
+        // Load default boss configuration from config
         loadDefaultConfig();
+        // Load personal message format from config
         loadPersonalMessageFormat();
     }
 
     private void loadFormats() {
+        // Get damage and percentage formats from config
         damageFormat = getConfig().getString("damage_format", "%.2f");
         percentageFormat = getConfig().getString("percentage_format", "%.1f%%");
+        // Get personal message format from config
         personalMessageFormat = getConfig().getString("personal_message_format",
             "&6Your contribution: &ePosition: {position}, Damage: {damage} ({percentage}%)");
     }
 
-
     private void loadBossConfigs() {
+        // Get boss configurations section from config
         var bossesSection = getConfig().getConfigurationSection("bosses");
         if (bossesSection != null) {
+            // Iterate through each boss configuration
             for (String bossName : bossesSection.getKeys(false)) {
                 var bossSection = bossesSection.getConfigurationSection(bossName);
                 if (bossSection != null && !bossSection.getKeys(false).isEmpty()) {
+                    // Add boss configuration to map
                     bossConfigs.put(bossName.toUpperCase(), new BossConfig(
                         bossSection.getString("victory_message"),
                         bossSection.getInt("top_players_to_show", 3),
                         bossSection.getStringList("top_players_format")
                     ));
                 } else {
+                    // Add null configuration if section is empty
                     bossConfigs.put(bossName.toUpperCase(), null);
                 }
             }
@@ -117,8 +146,10 @@ public class DamageTracker extends JavaPlugin {
     }
 
     private void loadDefaultConfig() {
+        // Get default boss configuration section from config
         var defaultSection = getConfig().getConfigurationSection("default_boss_config");
         if (defaultSection != null) {
+            // Initialize default boss configuration
             defaultBossConfig = new BossConfig(
                 defaultSection.getString("victory_message"),
                 defaultSection.getInt("top_players_to_show", 3),
@@ -131,11 +162,13 @@ public class DamageTracker extends JavaPlugin {
     }
 
     private void loadPersonalMessageFormat() {
+        // Get personal message format from config
         personalMessageFormat = getConfig().getString("personal_message_format",
             "&6Your contribution: &ePosition: {position}, Damage: {damage} ({percentage}%)");
     }
 
     public void sendMessage(Player player, String message) {
+        // Send a message to a player using Adventure API
         if (player != null && message != null && adventure != null) {
             Component component = MessageUtils.deserialize(message);
             adventure.player(player).sendMessage(component);
@@ -143,6 +176,7 @@ public class DamageTracker extends JavaPlugin {
     }
 
     private void displayAsciiArt() {
+        // Display ASCII art in the console
         String version = getDescription().getVersion();
         String enableMessage = String.format("v%s has been enabled! ~ElPlatano0871", version);
 
@@ -182,6 +216,7 @@ public class DamageTracker extends JavaPlugin {
     }
 
     public String getPlayerPrefix(Player player) {
+        // Get player prefix using Vault or LuckPerms
         if (useVault && vaultChat != null) {
             return vaultChat.getPlayerPrefix(player);
         } else if (useLuckPerms && luckPerms != null) {
@@ -191,7 +226,7 @@ public class DamageTracker extends JavaPlugin {
         return "";
     }
 
-    // Métodos delegados al DamageManager
+    // Methods delegated to DamageManager
     public void addDamage(UUID bossId, Player player, double damage) {
         damageManager.addDamage(bossId, player, damage);
     }

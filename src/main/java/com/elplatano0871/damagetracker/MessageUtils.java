@@ -8,15 +8,20 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class MessageUtils {
+    // MiniMessage instance for deserialization
     private static final MiniMessage miniMessage = MiniMessage.miniMessage();
+    // BukkitAudiences instance for sending messages
     private static BukkitAudiences adventure;
+    // Constants for chat width and space width in pixels
     private static final int CHAT_WIDTH = 320; // Minecraft's chat width in pixels
     private static final int SPACE_WIDTH = 4; // Width of a space character in pixels
     
+    // Initialize the BukkitAudiences instance
     public static void init(DamageTracker plugin) {
         adventure = BukkitAudiences.create(plugin);
     }
 
+    // Close the BukkitAudiences instance
     public static void close() {
         if (adventure != null) {
             adventure.close();
@@ -24,6 +29,7 @@ public class MessageUtils {
         }
     }
 
+    // Send a message to a CommandSender
     public static void sendMessage(CommandSender sender, String message) {
         if (message == null || message.isEmpty()) return;
 
@@ -34,6 +40,7 @@ public class MessageUtils {
         }
     }
 
+    // Deserialize a message using MiniMessage
     public static Component deserialize(String message) {
         if (message == null || message.isEmpty()) {
             return Component.empty();
@@ -48,6 +55,7 @@ public class MessageUtils {
         }
     }
 
+    // Process <centered> tags in the input string
     private static String processCenteredTags(String input) {
         StringBuilder result = new StringBuilder();
         int lastIndex = 0;
@@ -80,6 +88,7 @@ public class MessageUtils {
         return result.toString();
     }
 
+    // Center the given text
     private static String centerText(String text) {
         if (text == null || text.isEmpty()) {
             return text;
@@ -100,6 +109,7 @@ public class MessageUtils {
         return spaces + text;
     }
 
+    // Calculate the width of the message
     private static int getMessageWidth(String message) {
         int width = 0;
         for (char c : message.toCharArray()) {
@@ -108,6 +118,7 @@ public class MessageUtils {
         return width;
     }
 
+    // Get the width of a character
     private static int getCharWidth(char c) {
         // Simplified character width calculation
         // In a real implementation, you might want to have a more complete mapping
@@ -119,6 +130,7 @@ public class MessageUtils {
         return 7; // Default for other characters
     }
 
+    // Strip color codes from the input string
     private static String stripColor(String input) {
         // Remove legacy color codes
         input = input.replaceAll("§[0-9a-fk-or]", "");
@@ -129,6 +141,7 @@ public class MessageUtils {
         return input;
     }
 
+    // Convert legacy and hex color codes to MiniMessage format
     public static String convertLegacyAndHexToMiniMessage(String input) {
         if (input == null) return null;
         String result = ChatColor.translateAlternateColorCodes('&', input);
@@ -136,6 +149,7 @@ public class MessageUtils {
         return convertLegacyToMiniMessage(result);
     }
 
+    // Convert legacy color codes to MiniMessage format
     private static String convertLegacyToMiniMessage(String input) {
         return input.replace("§0", "<black>")
                    .replace("§1", "<dark_blue>")

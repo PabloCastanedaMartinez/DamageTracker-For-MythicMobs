@@ -16,11 +16,13 @@ public class DamageTrackerCommand implements CommandExecutor, TabCompleter {
     private final DamageTracker plugin;
     private final String damageFormat;
 
+    // Constructor to initialize the plugin and damage format
     public DamageTrackerCommand(DamageTracker plugin) {
         this.plugin = plugin;
         this.damageFormat = plugin.getConfig().getString("damage_format", "%.2f");
     }
 
+    // Handles the command execution
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("damagetracker")) {
@@ -37,6 +39,7 @@ public class DamageTrackerCommand implements CommandExecutor, TabCompleter {
         return false;
     }
 
+    // Shows help messages to the sender
     private boolean showHelp(CommandSender sender) {
         MessageUtils.sendMessage(sender, "&eCommands available:");
         MessageUtils.sendMessage(sender, "&6/damagetracker reload &e- Reloads the configuration");
@@ -45,6 +48,7 @@ public class DamageTrackerCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    // Handles the reload command
     private boolean handleReloadCommand(CommandSender sender) {
         if (!sender.hasPermission("damagetracker.reload")) {
             MessageUtils.sendMessage(sender, "&cYou don't have permission to use this command.");
@@ -60,6 +64,7 @@ public class DamageTrackerCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    // Handles the damage command
     private boolean handleDamageCommand(CommandSender sender) {
         if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "This command can only be used by players.");
@@ -70,6 +75,7 @@ public class DamageTrackerCommand implements CommandExecutor, TabCompleter {
         double totalDamage = 0;
         Map<UUID, Map<UUID, Double>> allDamageData = plugin.getAllDamageData();
         
+        // Calculate the total damage for the player
         for (Map<UUID, Double> damageMap : allDamageData.values()) {
             totalDamage += damageMap.getOrDefault(player.getUniqueId(), 0.0);
         }
@@ -79,13 +85,16 @@ public class DamageTrackerCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    // Handles the top command
     private boolean handleTopCommand(CommandSender sender) {
         int topPlayersToShow = plugin.getDefaultTopPlayersToShow();
         Map<UUID, Double> totalDamageMap = plugin.calculateTotalDamage();
         
+        // Get the top players with the most damage
         List<Map.Entry<UUID, Double>> topPlayers = plugin.getTopDamage(totalDamageMap, topPlayersToShow);
         sender.sendMessage(ChatColor.YELLOW + "Top " + topPlayersToShow + " players with most damage:");
         
+        // Display the top players
         for (int i = 0; i < topPlayers.size(); i++) {
             Map.Entry<UUID, Double> entry = topPlayers.get(i);
             Player player = plugin.getServer().getPlayer(entry.getKey());
@@ -99,6 +108,7 @@ public class DamageTrackerCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    // Handles tab completion for the command
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (command.getName().equalsIgnoreCase("damagetracker")) {
