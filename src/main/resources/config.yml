@@ -1,53 +1,43 @@
 bosses:
-# Example boss configuration using MiniMessage format
+  # Example boss configuration using message references
   Example:
-    victory_message: |
-      <gradient:gold:yellow>=================================================
-      <rainbow>The Boss has been defeated!</rainbow>
-      <green>The top fighters were:
-      {top_players}
-      <gradient:gold:yellow>=================================================
+    victory_message_id: DEFAULT_VICTORY
     top_players_to_show: 3
-    top_players_format:
-      - "<gradient:dark_green:green>First place: {prefix}<white>{player_name} <red>({damage} | {percentage}%)"
-      - "<gradient:yellow:gold>Second place: {prefix}<white>{player_name} <red>({damage} | {percentage}%)"
-      - "<gradient:#ff8000:red>Third place: {prefix}<white>{player_name} <red>({damage} | {percentage}%)"
+    position_format_id: DEFAULT
+    broadcast_message: true
+    personal_message_id: DEFAULT
+    non_participant_message_id: DEFAULT
 
-# Example boss configuration using legacy color codes
-  example_boss2:
-    victory_message: |
-      &#FF0000=================================================
-      &#FF4500The fearsome &#FF6347Boss &#FF0000has fallen!
-      &#FF6347The most powerful champions:
-      {top_players}
-      &#FF0000=================================================
+  # Example boss with epic formatting
+  EPIC_BOSS:
+    victory_message_id: BOSS_EPIC_VICTORY
     top_players_to_show: 5
-    top_players_format:
-      - "&#FF0000★ &#FF4500Supreme Champion: &#FFFFFF{player_name} &#808080- ({damage} | {percentage}%)"
-      - "&#FF4500☆ &#FFFFFFSecond strongest: &#FFFFFF{player_name} &#808080- ({damage} | {percentage}%)"
-      - "&#FFA500☆ &#FFFFFFThird strongest: &#FFFFFF{player_name} &#808080- ({damage} | {percentage}%)"
-      - "&#FFD700☆ &#FFFFFFFourth strongest: &#FFFFFF{player_name} &#808080- ({damage} | {percentage}%)"
-      - "&#C0C0C0☆ &#FFFFFFFifth strongest: &#FFFFFF{player_name} &#808080- ({damage} | {percentage}%)"
+    position_format_id: EPIC_BOSS
+    broadcast_message: true
+    personal_message_id: EPIC
+    non_participant_message_id: EPIC
 
-# Bosses with this format willuse default configuration
-  EXAMPLE_BOSS3: {}
+  # Example raid boss
+  RAID_BOSS:
+    victory_message_id: RAID_BOSS_VICTORY
+    top_players_to_show: 3
+    position_format_id: DEFAULT
+    broadcast_message: true
+    personal_message_id: DEFAULT
+    non_participant_message_id: DEFAULT
 
-# Default configuration for bosses with incomplete configuration
+  # Example no custom message boss
+    No_Custom_Message: []
+
+# Default configuration for bosses
 default_boss_config:
-  victory_message: |
-    &6=================================================
-    &6The boss {boss_name} has been defeated!
-    &eThe top fighters were:
-    {top_players}
-    &6=================================================
+  victory_message_id: DEFAULT_VICTORY
   top_players_to_show: 3
-  top_players_format:
-    - "&aFirst place: {prefix}&7{player_name} &c({damage} | {percentage}%)"
-    - "&eSecond place: {prefix}&7{player_name} &c({damage} | {percentage}%)"
-    - "&6Third place: {prefix}&7{player_name} &c({damage} | {percentage}%)"
+  position_format_id: DEFAULT
+  broadcast_message: true
+  personal_message_id: DEFAULT
+  non_participant_message_id: DEFAULT
 
 # Format for displaying damage values
 damage_format: "%.2f"
 percentage_format: "%.1f"
-
-personal_message_format: "&6Your contribution: &ePosition: {position}, Damage: {damage} ({percentage}%)"

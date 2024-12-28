@@ -7,8 +7,13 @@ softdepend: [Vault, LuckPerms]
 
 commands:
   damagetracker:
-    description: Main command for DamageTracker plugin
-    usage: /<command> [reload|damage|top]
+    description: Main command for the DamageTracker plugin
+    usage: |
+      /<command> reload - Reloads the configuration
+      /<command> check <bossId> - Shows your damage to the specified boss
+      /<command> top <bossId> - Shows the top damage to the specified boss
+      /<command> clear <bossId> - Clears the damage data of the specified boss
+    aliases: [dt]
     permission: damagetracker.use
 
 permissions:
@@ -16,5 +21,14 @@ permissions:
     description: Allows using the DamageTracker command
     default: true
   damagetracker.reload:
-    description: Allows reloading the DamageTracker plugin
+    description: Allows reloading the plugin configuration
+    default: op
+  damagetracker.check:
+    description: Allows checking personal damage to a boss
+    default: true
+  damagetracker.checktop:
+    description: Allows viewing the damage ranking of a boss
+    default: true
+  damagetracker.cleardata:
+    description: Allows clearing damage data of a boss
     default: op

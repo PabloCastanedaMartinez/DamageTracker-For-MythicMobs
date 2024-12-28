@@ -1,0 +1,64 @@
+# Victory Messages Configuration
+# This file contains all victory message templates that can be referenced in config.yml
+
+messages:
+  # Default Messages
+  DEFAULT_VICTORY: |
+    <gradient:gold:yellow>=================================================
+    <rainbow>The Boss has been defeated!</rainbow>
+    <green>The top fighters were:
+    {top_players}
+    {personal_damage}
+    <gradient:gold:yellow>=================================================
+
+  # Boss-specific Messages
+  BOSS_EPIC_VICTORY: |
+    <gradient:#FF0000:#FF8C00>=================================================
+    ⚔ Epic Victory! The {boss_name} has fallen! ⚔
+    
+    🏆 Champions of the battle:
+    {top_players}
+    
+    {personal_damage}
+    <gradient:#FF0000:#FF8C00>=================================================
+
+  RAID_BOSS_VICTORY: |
+    <gradient:#4B0082:#9400D3>=================================================
+    ⚔ The Raid Boss {boss_name} has been vanquished! ⚔
+    
+    🏆 Legendary Warriors:
+    {top_players}
+    
+    {personal_damage}
+    <gradient:#4B0082:#9400D3>=================================================
+
+# Message formats for specific positions
+position_formats:
+  DEFAULT:
+    - "<gradient:dark_green:green>Champion: {prefix}<white>{player_name} <red>({damage} | {percentage}%)"
+    - "<gradient:yellow:gold>Runner-up: {prefix}<white>{player_name} <red>({damage} | {percentage}%)"
+    - "<gradient:#ff8000:red>Third Place: {prefix}<white>{player_name} <red>({damage} | {percentage}%)"
+
+  EPIC_BOSS:
+    - "🥇 <gradient:#FFD700:#FFA500>Supreme Champion: {prefix}<white>{player_name} <gray>({damage} | {percentage}%)"
+    - "🥈 <gradient:#C0C0C0:#A9A9A9>Valiant Warrior: {prefix}<white>{player_name} <gray>({damage} | {percentage}%)"
+    - "🥉 <gradient:#CD7F32:#8B4513>Brave Fighter: {prefix}<white>{player_name} <gray>({damage} | {percentage}%)"
+
+# Personal performance messages
+personal_messages:
+  DEFAULT: |
+    <yellow>Your Performance:
+    Position: {position}
+    Damage Dealt: {damage}
+    Contribution: {percentage}%
+
+  EPIC: |
+    <gradient:#FFD700:#FFA500>Your Epic Performance:
+    ⭐ Position: #{position}
+    ⚔️ Damage: {damage}
+    📊 Contribution: {percentage}%
+
+# Messages for non-participants
+non_participant_messages:
+  DEFAULT: "<red>You didn't participate in this battle!"
+  EPIC: "<red>You missed out on an epic battle!"

@@ -2,53 +2,118 @@ package com.elplatano0871.damagetracker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class BossConfig {
-    public String victoryMessage;
-    public int topPlayersToShow;
-    public List<String> topPlayersFormat;
+    private String victoryMessageId;
+    private String positionFormatId;
+    private String personalMessageId;
+    private String nonParticipantMessageId;
+    private int topPlayersToShow;
+    private boolean broadcastMessage;
 
     /**
      * Constructor for BossConfig with all parameters
      *
-     * @param victoryMessage    The message to display when a boss is defeated
-     * @param topPlayersToShow  Number of top players to display in the ranking
-     * @param topPlayersFormat  List of format strings for each ranking position
+     * @param victoryMessageId The ID of the victory message to use
+     * @param positionFormatId The ID of the position format to use
+     * @param personalMessageId The ID of the personal message to use
+     * @param nonParticipantMessageId The ID of the non-participant message to use
+     * @param topPlayersToShow Number of top players to display in the ranking
+     * @param broadcastMessage Whether to broadcast the message to all players
      */
-    public BossConfig(String victoryMessage, int topPlayersToShow, List<String> topPlayersFormat) {
-        this.victoryMessage = victoryMessage;
+    public BossConfig(String victoryMessageId, String positionFormatId, String personalMessageId,
+                      String nonParticipantMessageId, int topPlayersToShow, boolean broadcastMessage) {
+        this.victoryMessageId = victoryMessageId;
+        this.positionFormatId = positionFormatId;
+        this.personalMessageId = personalMessageId;
+        this.nonParticipantMessageId = nonParticipantMessageId;
         this.topPlayersToShow = topPlayersToShow;
-        this.topPlayersFormat = topPlayersFormat != null ? new ArrayList<>(topPlayersFormat) : new ArrayList<>();
+        this.broadcastMessage = broadcastMessage;
     }
 
     /**
      * Default constructor with default values
      */
     public BossConfig() {
-        this.victoryMessage = "&6The boss has been defeated!";
+        this.victoryMessageId = "DEFAULT_VICTORY";
+        this.positionFormatId = "DEFAULT";
+        this.personalMessageId = "DEFAULT";
+        this.nonParticipantMessageId = "DEFAULT";
         this.topPlayersToShow = 3;
-        this.topPlayersFormat = new ArrayList<>();
-        this.topPlayersFormat.add("&aFirst place: {prefix}&7{player_name} &c({damage} | {percentage}%)");
-        this.topPlayersFormat.add("&eSecond place: {prefix}&7{player_name} &c({damage} | {percentage}%)");
-        this.topPlayersFormat.add("&6Third place: {prefix}&7{player_name} &c({damage} | {percentage}%)");
+        this.broadcastMessage = true;
     }
 
     /**
-     * Gets the victory message
+     * Gets whether to broadcast the message to all players
      *
-     * @return Victory message string
+     * @return true if message should be broadcast, false if only for participants
      */
-    public String getVictoryMessage() {
-        return victoryMessage;
+    public boolean isBroadcastMessage() {
+        return broadcastMessage;
     }
 
     /**
-     * Sets the victory message
+     * Sets whether to broadcast the message to all players
      *
-     * @param victoryMessage New victory message
+     * @param broadcastMessage true to broadcast, false for participants only
      */
-    public void setVictoryMessage(String victoryMessage) {
-        this.victoryMessage = victoryMessage;
+    public void setBroadcastMessage(boolean broadcastMessage) {
+        this.broadcastMessage = broadcastMessage;
+    }
+
+    /**
+     * Gets the ID of the personal message format
+     *
+     * @return Personal message ID
+     */
+    public String getPersonalMessageId() {
+        return personalMessageId;
+    }
+
+    /**
+     * Sets the ID of the personal message format
+     *
+     * @param personalMessageId New personal message ID
+     */
+    public void setPersonalMessageId(String personalMessageId) {
+        this.personalMessageId = personalMessageId;
+    }
+
+    /**
+     * Gets the ID of the message for non-participants
+     *
+     * @return Non-participant message ID
+     */
+    public String getNonParticipantMessageId() {
+        return nonParticipantMessageId;
+    }
+
+    /**
+     * Sets the ID of the message for non-participants
+     *
+     * @param nonParticipantMessageId New non-participant message ID
+     */
+    public void setNonParticipantMessageId(String nonParticipantMessageId) {
+        this.nonParticipantMessageId = nonParticipantMessageId;
+    }
+
+    /**
+     * Gets the victory message ID
+     *
+     * @return Victory message ID
+     */
+    public String getVictoryMessageId() {
+        return victoryMessageId;
+    }
+
+    /**
+     * Sets the victory message ID
+     *
+     * @param victoryMessageId New victory message ID
+     */
+    public void setVictoryMessageId(String victoryMessageId) {
+        this.victoryMessageId = victoryMessageId;
     }
 
     /**
@@ -70,34 +135,21 @@ public class BossConfig {
     }
 
     /**
-     * Gets the format list for top players
+     * Gets the position format ID
      *
-     * @return List of format strings
+     * @return Position format ID
      */
-    public List<String> getTopPlayersFormat() {
-        return new ArrayList<>(topPlayersFormat);
+    public String getPositionFormatId() {
+        return positionFormatId;
     }
 
     /**
-     * Sets the format list for top players
+     * Sets the position format ID
      *
-     * @param topPlayersFormat New list of format strings
+     * @param positionFormatId New position format ID
      */
-    public void setTopPlayersFormat(List<String> topPlayersFormat) {
-        this.topPlayersFormat = topPlayersFormat != null ? new ArrayList<>(topPlayersFormat) : new ArrayList<>();
-    }
-
-    /**
-     * Gets a specific format string for a position
-     *
-     * @param position Position in the ranking (0-based)
-     * @return Format string for the position, or default format if not found
-     */
-    public String getFormatForPosition(int position) {
-        if (position >= 0 && position < topPlayersFormat.size()) {
-            return topPlayersFormat.get(position);
-        }
-        return "&7#{position}: {prefix}{player_name} ({damage} | {percentage}%)";
+    public void setPositionFormatId(String positionFormatId) {
+        this.positionFormatId = positionFormatId;
     }
 
     /**
@@ -107,9 +159,12 @@ public class BossConfig {
      */
     public BossConfig copy() {
         return new BossConfig(
-            this.victoryMessage,
-            this.topPlayersToShow,
-            new ArrayList<>(this.topPlayersFormat)
+                this.victoryMessageId,
+                this.positionFormatId,
+                this.personalMessageId,
+                this.nonParticipantMessageId,
+                this.topPlayersToShow,
+                this.broadcastMessage
         );
     }
 
@@ -118,31 +173,55 @@ public class BossConfig {
      * Ensures all required fields have at least default values
      */
     public void validate() {
-        if (victoryMessage == null || victoryMessage.trim().isEmpty()) {
-            victoryMessage = "&6The boss has been defeated!";
+        if (victoryMessageId == null || victoryMessageId.trim().isEmpty()) {
+            victoryMessageId = "DEFAULT_VICTORY";
+        }
+
+        if (positionFormatId == null || positionFormatId.trim().isEmpty()) {
+            positionFormatId = "DEFAULT";
+        }
+
+        if (personalMessageId == null || personalMessageId.trim().isEmpty()) {
+            personalMessageId = "DEFAULT";
+        }
+
+        if (nonParticipantMessageId == null || nonParticipantMessageId.trim().isEmpty()) {
+            nonParticipantMessageId = "DEFAULT";
         }
 
         if (topPlayersToShow < 1) {
             topPlayersToShow = 3;
         }
+    }
 
-        if (topPlayersFormat == null) {
-            topPlayersFormat = new ArrayList<>();
-        }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BossConfig that = (BossConfig) o;
+        return topPlayersToShow == that.topPlayersToShow &&
+                broadcastMessage == that.broadcastMessage &&
+                Objects.equals(victoryMessageId, that.victoryMessageId) &&
+                Objects.equals(positionFormatId, that.positionFormatId) &&
+                Objects.equals(personalMessageId, that.personalMessageId) &&
+                Objects.equals(nonParticipantMessageId, that.nonParticipantMessageId);
+    }
 
-        // Ensure we have enough formats for the number of players to show
-        while (topPlayersFormat.size() < topPlayersToShow) {
-            int position = topPlayersFormat.size() + 1;
-            topPlayersFormat.add(String.format("&7#%d: {prefix}{player_name} ({damage} | {percentage}%%)", position));
-        }
+    @Override
+    public int hashCode() {
+        return Objects.hash(victoryMessageId, positionFormatId, personalMessageId,
+                nonParticipantMessageId, topPlayersToShow, broadcastMessage);
     }
 
     @Override
     public String toString() {
         return "BossConfig{" +
-                "victoryMessage='" + victoryMessage + '\'' +
+                "victoryMessageId='" + victoryMessageId + '\'' +
+                ", positionFormatId='" + positionFormatId + '\'' +
+                ", personalMessageId='" + personalMessageId + '\'' +
+                ", nonParticipantMessageId='" + nonParticipantMessageId + '\'' +
                 ", topPlayersToShow=" + topPlayersToShow +
-                ", topPlayersFormat=" + topPlayersFormat +
+                ", broadcastMessage=" + broadcastMessage +
                 '}';
     }
 }

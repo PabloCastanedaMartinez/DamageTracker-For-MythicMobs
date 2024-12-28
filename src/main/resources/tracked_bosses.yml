@@ -1,0 +1,22 @@
+# List of bosses to track without showing victory messages
+# The system will only track damage and positions of these bosses
+tracked_bosses:
+  # You can list the MythicMobs IDs here
+  # Example:
+  # - Example_Boss
+  # - GIANT_BOSS
+  # - CUSTOM_BOSS
+  # Each ID must match exactly with the internal ID of the mob in MythicMobs
+  enabled_bosses: []
+
+# Configuration for tracking
+tracking_config:
+  # Determines whether to keep damage history after the boss dies
+  # If false, the data will be cleared when the boss dies
+  # If true, the data will remain until manually cleared or the server restarts
+  persist_data: false
+
+  # Maximum time (in seconds) to keep damage data
+  # after the boss dies (if persist_data is true)
+  # Set to -1 to keep until server restart
+  data_retention_time: 300
