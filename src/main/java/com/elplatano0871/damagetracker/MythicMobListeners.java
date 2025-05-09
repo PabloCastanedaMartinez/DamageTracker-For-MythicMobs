@@ -172,17 +172,28 @@ public class MythicMobListeners implements Listener {
 
             String mobInternalName = activeMob.getMobType();
 
-            // Only track damage if the boss is in tracked_bosses.yml
             if (!plugin.getTrackedBossManager().isTrackedBoss(mobInternalName.toUpperCase())) {
                 return;
             }
 
             double maxHealth = ((LivingEntity) activeMob.getEntity().getBukkitEntity()).getMaxHealth();
 
-            // Add damage to tracked boss
-            plugin.getTrackedBossManager().addDamage(mobInternalName.toUpperCase(), damager, event.getFinalDamage());
-            // Set max health if not already set
+            // Obtener el daño actual acumulado del jugador desde TrackedBossManager
+            double currentDamage = plugin.getTrackedBossManager().getPlayerDamage(mobInternalName.toUpperCase(), damager.getUniqueId());
+            double newDamage = event.getFinalDamage();
+            double totalDamage = currentDamage + newDamage;
+
+            // Actualizar el daño acumulado en TrackedBossManager
+            plugin.getTrackedBossManager().addDamage(mobInternalName.toUpperCase(), damager, newDamage);
             plugin.getTrackedBossManager().setBossMaxHealth(mobInternalName.toUpperCase(), maxHealth);
+
+            // Actualizar la base de datos con el daño total acumulado
+            plugin.getDatabaseManager().updateDamage(
+                    mobInternalName,
+                    damager.getUniqueId(),
+                    damager.getName(),
+                    totalDamage // Envía el total acumulado en lugar del daño del último golpe
+            );
 
         } catch (Exception e) {
             plugin.getLogger().warning("Error processing damage event: " + e.getMessage());

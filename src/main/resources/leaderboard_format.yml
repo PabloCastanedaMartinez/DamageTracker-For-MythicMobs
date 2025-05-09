@@ -1,0 +1,18 @@
+# Format for the leaderboard
+formats:
+  # Format for player name
+  name: "&e{name}"
+
+  # Format for damage
+  damage: "&c{damage}"
+
+  # Symbol to display next to each entry
+  symbol: "⚔"
+
+# Complete format for each line
+# Available variables:
+# {symbol} - The configured symbol
+# {position} - The player's position
+# {name} - The player's name (formatted)
+# {damage} - The damage dealt (formatted)
+format: "{symbol} {position}. {name}: {damage}"

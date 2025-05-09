@@ -1,7 +1,5 @@
 package com.elplatano0871.damagetracker;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class BossConfig {

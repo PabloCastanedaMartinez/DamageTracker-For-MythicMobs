@@ -52,7 +52,7 @@ public class DamageTrackerPlaceholder extends PlaceholderExpansion {
      */
     @Override
     public @NotNull String getVersion() {
-        return "1.0";
+        return "2.0";
     }
 
     /**

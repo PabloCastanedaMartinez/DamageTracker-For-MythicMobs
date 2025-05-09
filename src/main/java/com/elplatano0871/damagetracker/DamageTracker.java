@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import net.milkbowl.vault.chat.Chat;
-import net.luckperms.api.LuckPerms;
 import java.util.*;
 
 public class DamageTracker extends JavaPlugin {
@@ -13,16 +12,17 @@ public class DamageTracker extends JavaPlugin {
     private DamageManager damageManager;
     private TrackedBossManager trackedBossManager;
     private VictoryMessageManager victoryMessageManager;
+    private DatabaseManager databaseManager;
     private boolean useVault;
-    private boolean useLuckPerms;
     private Chat vaultChat;
-    private LuckPerms luckPerms;
     public String personalMessageFormat;
     public String damageFormat;
     public String percentageFormat;
 
     @Override
     public void onEnable() {
+        // Initialize database manager
+        databaseManager = new DatabaseManager(this);
         // Initialize boss configurations
         bossConfigs = new HashMap<>();
         // Initialize the damage manager
@@ -34,7 +34,7 @@ public class DamageTracker extends JavaPlugin {
         // Load configuration from file
         loadConfig();
         // Initialize message utilities
-        MessageUtils.init(this); 
+        MessageUtils.init(this);
         // Register event handlers and commands
         registerHandlers();
         // Setup integrations with other plugins
@@ -46,7 +46,11 @@ public class DamageTracker extends JavaPlugin {
     @Override
     public void onDisable() {
         // Close message utilities
-        MessageUtils.close(); 
+        MessageUtils.close();
+        // Close database connection
+        if (databaseManager != null) {
+            databaseManager.close();
+        }
     }
 
     private void initializeDamageManager() {
@@ -66,7 +70,8 @@ public class DamageTracker extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new MythicMobListeners(this), this);
         // Register placeholder
         new DamageTrackerPlaceholder(this).register();
-        
+        new DamageLeaderboardExpansion(this, databaseManager).register();
+
         // Register command handler
         DamageTrackerCommand commandHandler = new DamageTrackerCommand(this, trackedBossManager);
         getCommand("damagetracker").setExecutor(commandHandler);
@@ -74,32 +79,33 @@ public class DamageTracker extends JavaPlugin {
     }
 
     private void setupIntegrations() {
-        // Setup Vault integration
+        // Setup Vault integration only
         setupVault();
-        // Setup LuckPerms integration
-        setupLuckPerms();
     }
 
     private void setupVault() {
-        // Check if Vault plugin is available
-        if (getServer().getPluginManager().getPlugin("Vault") != null) {
-            // Get Vault chat provider
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            getLogger().info("Vault plugin not found. Prefix features will be disabled.");
+            useVault = false;
+            vaultChat = null;
+            return;
+        }
+
+        try {
             org.bukkit.plugin.RegisteredServiceProvider<Chat> rsp = getServer().getServicesManager().getRegistration(Chat.class);
             if (rsp != null) {
                 vaultChat = rsp.getProvider();
                 useVault = true;
-                getLogger().info("Vault integration enabled.");
+                getLogger().info("Vault integration enabled successfully.");
+            } else {
+                getLogger().warning("Vault found but no chat provider available. Prefix features will be disabled.");
+                useVault = false;
+                vaultChat = null;
             }
-        }
-    }
-
-    private void setupLuckPerms() {
-        // Get LuckPerms provider
-        org.bukkit.plugin.RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
-        if (provider != null) {
-            luckPerms = provider.getProvider();
-            useLuckPerms = true;
-            getLogger().info("LuckPerms integration enabled.");
+        } catch (Exception e) {
+            getLogger().warning("Error setting up Vault integration. Prefix features will be disabled.");
+            useVault = false;
+            vaultChat = null;
         }
     }
 
@@ -130,7 +136,7 @@ public class DamageTracker extends JavaPlugin {
         percentageFormat = getConfig().getString("percentage_format", "%.1f%%");
         // Get personal message format from config
         personalMessageFormat = getConfig().getString("personal_message_format",
-            "&6Your contribution: &ePosition: {position}, Damage: {damage} ({percentage}%)");
+                "&6Your contribution: &ePosition: {position}, Damage: {damage} ({percentage}%)");
     }
 
     private void loadBossConfigs() {
@@ -208,7 +214,7 @@ public class DamageTracker extends JavaPlugin {
     private void loadPersonalMessageFormat() {
         // Get personal message format from config
         personalMessageFormat = getConfig().getString("personal_message_format",
-            "&6Your contribution: &ePosition: {position}, Damage: {damage} ({percentage}%)");
+                "&6Your contribution: &ePosition: {position}, Damage: {damage} ({percentage}%)");
     }
 
     private void displayAsciiArt() {
@@ -217,12 +223,12 @@ public class DamageTracker extends JavaPlugin {
         String enableMessage = String.format("v%s has been enabled! ~ElPlatano0871", version);
 
         String[] asciiArt = {
-            " ____                                  _____               _             ",
-            "|  _ \\  __ _ _ __ ___   __ _  __ _  __|_   _| __ __ _  ___| | _____ _ __",
-            "| | | |/ _` | '_ ` _ \\ / _` |/ _` |/ _ \\| || '__/ _` |/ __| |/ / _ \\ '__|",
-            "| |_| | (_| | | | | | | (_| | (_| |  __/| || | | (_| | (__|   <  __/ |  ",
-            "|____/ \\__,_|_| |_| |_|\\__,_|\\__, |\\___|_||_|  \\__,_|\\___|_|\\_\\___|_|  ",
-            "                             |___/                                      "
+                " ____    ____    _    ",
+                "|  _ \\  __ _ _ __ ___   __ _  __ _  __|_   _| __ __ _  ___| | ____ _ __",
+                "| | | |/ _` | '_ ` _ \\ / _` |/ _` |/ _ \\| || '__/ _` |/ __| |/ / _ \\ '__|",
+                "| |_| | (_| | | | | | | (_| | (_| |  __/| || | | (_| | (__|   <  __/ |  ",
+                "|____/ \\__,_|_| |_| |_|\\__,_|\\__, |\\___|_||_|  \\__,_|\\___|_|\\_\\___|_|  ",
+                "    |___/    "
         };
 
         Arrays.stream(asciiArt).forEach(line -> {
@@ -248,132 +254,84 @@ public class DamageTracker extends JavaPlugin {
         return victoryMessageManager;
     }
 
-    /**
-     * Gets the map of boss configurations.
-     * @return A map where the key is the boss name and the value is the BossConfig object.
-     */
     public Map<String, BossConfig> getBossConfigs() {
         return bossConfigs;
     }
 
-    /**
-     * Gets the default boss configuration.
-     * @return The default BossConfig object.
-     */
     public BossConfig getDefaultBossConfig() {
         return defaultBossConfig;
     }
 
-    /**
-     * Gets the default number of top players to show.
-     * @return The number of top players to show, or 3 if the default configuration is null.
-     */
     public int getDefaultTopPlayersToShow() {
         return defaultBossConfig != null ? defaultBossConfig.getTopPlayersToShow() : 3;
     }
-
-    /**
-     * Gets the player's prefix using Vault or LuckPerms.
-     * @param player The player whose prefix is to be retrieved.
-     * @return The player's prefix, or an empty string if neither Vault nor LuckPerms is used.
-     */
-    public String getPlayerPrefix(Player player) {
-        if (useVault && vaultChat != null) {
-            return vaultChat.getPlayerPrefix(player);
-        } else if (useLuckPerms && luckPerms != null) {
-            var user = luckPerms.getUserManager().getUser(player.getUniqueId());
-            return user != null ? user.getCachedData().getMetaData().getPrefix() : "";
+ 
+    public int getTopPlayersToShow(String bossName) {
+        if (bossName == null) {
+            return getDefaultTopPlayersToShow();
         }
-        return "";
+        
+        BossConfig config = bossConfigs.get(bossName.toUpperCase());
+        if (config != null) {
+            return config.getTopPlayersToShow();
+        } else {
+            return getDefaultTopPlayersToShow();
+        }
     }
 
-    /**
-     * Adds damage to a boss for a specific player.
-     * @param bossId The UUID of the boss.
-     * @param player The player dealing the damage.
-     * @param damage The amount of damage dealt.
-     */
+
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
+    }
+
+    public String getPlayerPrefix(Player player) {
+        String prefix = "";
+        try {
+            if (useVault && vaultChat != null) {
+                prefix = vaultChat.getPlayerPrefix(player);
+            }
+        } catch (Exception e) {
+            getLogger().warning("Error getting player prefix: " + e.getMessage());
+        }
+        return prefix != null ? prefix : "";
+    }
+
     public void addDamage(UUID bossId, Player player, double damage) {
         damageManager.addDamage(bossId, player, damage);
     }
 
-    /**
-     * Gets the damage map for a specific boss.
-     * @param bossId The UUID of the boss.
-     * @return A map where the key is the player's UUID and the value is the damage dealt.
-     */
     public Map<UUID, Double> getBossDamageMap(UUID bossId) {
         return damageManager.getBossDamageMap(bossId);
     }
 
-    /**
-     * Gets all damage data for all bosses.
-     * @return A map where the key is the boss's UUID and the value is another map of player UUIDs to damage amounts.
-     */
     public Map<UUID, Map<UUID, Double>> getAllDamageData() {
         return damageManager.getAllDamageData();
     }
 
-    /**
-     * Gets the maximum health of a specific boss.
-     * @param bossId The UUID of the boss.
-     * @return The maximum health of the boss.
-     */
     public double getBossMaxHealth(UUID bossId) {
         return damageManager.getBossMaxHealth(bossId);
     }
 
-    /**
-     * Checks if a specific boss has a maximum health value set.
-     * @param bossId The UUID of the boss.
-     * @return True if the boss has a maximum health value set, false otherwise.
-     */
     public boolean hasBossMaxHealth(UUID bossId) {
         return damageManager.hasBossMaxHealth(bossId);
     }
 
-    /**
-     * Sets the maximum health of a specific boss.
-     * @param bossId The UUID of the boss.
-     * @param health The maximum health to set for the boss.
-     */
     public void setBossMaxHealth(UUID bossId, double health) {
         damageManager.setBossMaxHealth(bossId, health);
     }
 
-    /**
-     * Removes the damage data for a specific boss.
-     * @param bossId The UUID of the boss.
-     */
     public void removeBossData(UUID bossId) {
         damageManager.removeBossData(bossId);
     }
 
-    /**
-     * Formats the damage amount for display.
-     * @param damage The damage amount.
-     * @param maxHealth The maximum health of the boss.
-     * @param displayType The type of display format.
-     * @return A formatted string representing the damage.
-     */
     public String formatDamage(double damage, double maxHealth, String displayType) {
         return damageManager.formatDamage(damage, maxHealth, displayType);
     }
 
-    /**
-     * Calculates the total damage dealt by all players.
-     * @return A map where the key is the player's UUID and the value is the total damage dealt.
-     */
     public Map<UUID, Double> calculateTotalDamage() {
         return damageManager.calculateTotalDamage();
     }
 
-    /**
-     * Gets the top damage entries from a damage map.
-     * @param damageMap A map where the key is the player's UUID and the value is the damage dealt.
-     * @param limit The maximum number of entries to return.
-     * @return A list of entries sorted by damage in descending order.
-     */
     public List<Map.Entry<UUID, Double>> getTopDamage(Map<UUID, Double> damageMap, int limit) {
         return damageManager.getTopDamage(damageMap, limit);
     }
