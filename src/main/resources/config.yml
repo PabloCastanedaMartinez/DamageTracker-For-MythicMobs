@@ -1,12 +1,13 @@
 bosses:
   # Example boss configuration using message references
   Example:
-    victory_message_id: DEFAULT_VICTORY
-    top_players_to_show: 3
-    position_format_id: DEFAULT
-    broadcast_message: true
-    personal_message_id: DEFAULT
-    non_participant_message_id: DEFAULT
+    victory_message_id: DEFAULT_VICTORY # Message ID for the boss victory message
+    top_players_to_show: 3 # How many players will be shown in the top damage list
+    position_format_id: DEFAULT # Format ID for the position in the top damage list
+    broadcast_message: true # Whether to broadcast the victory message
+    personal_message_id: DEFAULT # Message ID for the personal damage message
+    non_participant_message_id: DEFAULT # Message ID for the non-participant damage message
+    hologram_type: FANCY # Can be NONE, FANCY 
 
   # Example boss with epic formatting
   EPIC_BOSS:
@@ -26,7 +27,7 @@ bosses:
     personal_message_id: DEFAULT
     non_participant_message_id: DEFAULT
 
-  # Example no custom message boss
+    # Example no custom message boss
     No_Custom_Message: []
 
 # Default configuration for bosses

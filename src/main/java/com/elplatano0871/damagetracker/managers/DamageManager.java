@@ -1,4 +1,4 @@
-package com.elplatano0871.damagetracker;
+package com.elplatano0871.damagetracker.managers;
 
 import org.bukkit.entity.Player;
 import java.util.*;

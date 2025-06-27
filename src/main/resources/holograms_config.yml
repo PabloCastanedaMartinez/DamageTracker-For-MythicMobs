@@ -1,0 +1,2 @@
+background_color: transparent # Can be any minecraft color, default or transparent
+hologram_duration: 30 # Time in seconds the hologram will be visible

@@ -1,5 +1,15 @@
 package com.elplatano0871.damagetracker;
 
+import com.elplatano0871.damagetracker.commands.DamageTrackerCommand;
+import com.elplatano0871.damagetracker.configs.BossConfig;
+import com.elplatano0871.damagetracker.listeners.MythicMobListeners;
+import com.elplatano0871.damagetracker.managers.DamageManager;
+import com.elplatano0871.damagetracker.managers.DatabaseManager;
+import com.elplatano0871.damagetracker.managers.TrackedBossManager;
+import com.elplatano0871.damagetracker.managers.VictoryMessageManager;
+import com.elplatano0871.damagetracker.placeholders.DamageTrackerPlaceholder;
+import com.elplatano0871.damagetracker.utils.MessageUtils;
+import com.elplatano0871.damagetracker.managers.HologramManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -18,7 +28,8 @@ public class DamageTracker extends JavaPlugin {
     public String personalMessageFormat;
     public String damageFormat;
     public String percentageFormat;
-
+    private HologramManager hologramManager;
+    
     @Override
     public void onEnable() {
         // Initialize database manager
@@ -41,6 +52,9 @@ public class DamageTracker extends JavaPlugin {
         setupIntegrations();
         // Display ASCII art in the console
         displayAsciiArt();
+        
+        // Initialize hologram manager
+        hologramManager = new HologramManager(this);
     }
 
     @Override
@@ -50,6 +64,11 @@ public class DamageTracker extends JavaPlugin {
         // Close database connection
         if (databaseManager != null) {
             databaseManager.close();
+        }
+        
+        // Remove all holograms
+        if (hologramManager != null) {
+            hologramManager.removeAllHolograms();
         }
     }
 
@@ -68,10 +87,9 @@ public class DamageTracker extends JavaPlugin {
     private void registerHandlers() {
         // Register event listeners
         getServer().getPluginManager().registerEvents(new MythicMobListeners(this), this);
-        // Register placeholder
-        new DamageTrackerPlaceholder(this).register();
-        new DamageLeaderboardExpansion(this, databaseManager).register();
-
+        // Register placeholder (unified expansion)
+        new DamageTrackerPlaceholder(this, databaseManager).register();
+    
         // Register command handler
         DamageTrackerCommand commandHandler = new DamageTrackerCommand(this, trackedBossManager);
         getCommand("damagetracker").setExecutor(commandHandler);
@@ -157,7 +175,8 @@ public class DamageTracker extends JavaPlugin {
                             bossSection.getString("personal_message_id", "DEFAULT"),
                             bossSection.getString("non_participant_message_id", "DEFAULT"),
                             bossSection.getInt("top_players_to_show", 3),
-                            bossSection.getBoolean("broadcast_message", true)
+                            bossSection.getBoolean("broadcast_message", true),
+                            bossSection.getString("hologram_type", "NONE") // Nueva línea
                     );
 
                     // Validate the configuration
@@ -193,7 +212,8 @@ public class DamageTracker extends JavaPlugin {
                     defaultSection.getString("personal_message_id", "DEFAULT"),
                     defaultSection.getString("non_participant_message_id", "DEFAULT"),
                     defaultSection.getInt("top_players_to_show", 3),
-                    defaultSection.getBoolean("broadcast_message", true)
+                    defaultSection.getBoolean("broadcast_message", true),
+                    defaultSection.getString("hologram_type", "NONE") // Nueva línea
             );
         } else {
             // Create a default configuration if none exists
@@ -334,5 +354,9 @@ public class DamageTracker extends JavaPlugin {
 
     public List<Map.Entry<UUID, Double>> getTopDamage(Map<UUID, Double> damageMap, int limit) {
         return damageManager.getTopDamage(damageMap, limit);
+    }
+
+    public HologramManager getHologramManager() {
+        return hologramManager;
     }
 }

@@ -1,5 +1,8 @@
-package com.elplatano0871.damagetracker;
+package com.elplatano0871.damagetracker.commands;
 
+import com.elplatano0871.damagetracker.DamageTracker;
+import com.elplatano0871.damagetracker.managers.TrackedBossManager;
+import com.elplatano0871.damagetracker.utils.MessageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;

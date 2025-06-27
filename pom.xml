@@ -37,6 +37,11 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+        <repository>
+            <id>fancyinnovations-releases</id>
+            <name>FancyInnovations Repository</name>
+            <url>https://repo.fancyinnovations.com/releases</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -95,6 +100,14 @@
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bukkit</artifactId>
             <version>4.3.1</version>
+        </dependency>
+
+        <!-- FancyHolograms API -->
+        <dependency>
+            <groupId>de.oliver</groupId>
+            <artifactId>FancyHolograms</artifactId>
+            <version>2.4.2</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

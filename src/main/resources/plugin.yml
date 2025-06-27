@@ -1,9 +1,9 @@
 name: DamageTracker_For_MythicMobs
 version: '${project.version}'
 main: com.elplatano0871.damagetracker.DamageTracker
-api-version: '1.19'
-depend: [MythicMobs, PlaceholderAPI]
-softdepend: [Vault, LuckPerms]
+api: '1.19'
+depend: [ MythicMobs, PlaceholderAPI ]
+softdepend: [ Vault, LuckPerms, FancyHolograms ]
 
 commands:
   damagetracker:
@@ -13,7 +13,7 @@ commands:
       /<command> check <bossId> - Shows your damage to the specified boss
       /<command> top <bossId> - Shows the top damage to the specified boss
       /<command> clear <bossId> - Clears the damage data of the specified boss
-    aliases: [dt]
+    aliases: [ dt ]
     permission: damagetracker.use
 
 permissions:

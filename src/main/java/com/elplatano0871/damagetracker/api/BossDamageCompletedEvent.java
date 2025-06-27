@@ -1,4 +1,4 @@
-package com.elplatano0871.damagetracker;
+package com.elplatano0871.damagetracker.api;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

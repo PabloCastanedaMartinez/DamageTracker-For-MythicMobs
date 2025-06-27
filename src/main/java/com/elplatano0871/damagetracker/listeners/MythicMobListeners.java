@@ -1,9 +1,15 @@
-package com.elplatano0871.damagetracker;
+package com.elplatano0871.damagetracker.listeners;
 
+import com.elplatano0871.damagetracker.DamageTracker;
+import com.elplatano0871.damagetracker.managers.VictoryMessageManager;
+import com.elplatano0871.damagetracker.api.BossDamageCompletedEvent;
+import com.elplatano0871.damagetracker.configs.BossConfig;
+import com.elplatano0871.damagetracker.utils.MessageUtils;
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythic.core.mobs.ActiveMob;
 import io.lumine.mythic.bukkit.events.MythicMobDeathEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -155,6 +161,23 @@ public class MythicMobListeners implements Listener {
                 MessageUtils.sendMessage(player, personalizedMessage);
             }
         }
+    
+        // Create hologram if configured
+        if ("FANCY".equalsIgnoreCase(bossConfig.getHologramType())) {
+            List<UUID> participants = new ArrayList<>(bossDamageMap.keySet());
+            Location bossLocation = activeMob.getEntity().getBukkitEntity().getLocation();
+            
+            plugin.getHologramManager().createVictoryHologram(
+                mobInternalName,
+                bossConfig.getHologramType(),
+                bossConfig.getVictoryMessageId(),
+                participants,
+                bossLocation,
+                bossDamageMap,
+                maxHealth,
+                activeMob.getDisplayName()
+            );
+        }
     }
 
     @EventHandler
@@ -176,23 +199,23 @@ public class MythicMobListeners implements Listener {
                 return;
             }
 
-            double maxHealth = ((LivingEntity) activeMob.getEntity().getBukkitEntity()).getMaxHealth();
+            double maxHealth = ((LivingEntity) activeMob.getEntity().getBukkitEntity()).getAttribute(org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH).getValue();
 
-            // Obtener el daño actual acumulado del jugador desde TrackedBossManager
+            // Get current accumulated damage from player from TrackedBossManager
             double currentDamage = plugin.getTrackedBossManager().getPlayerDamage(mobInternalName.toUpperCase(), damager.getUniqueId());
             double newDamage = event.getFinalDamage();
             double totalDamage = currentDamage + newDamage;
 
-            // Actualizar el daño acumulado en TrackedBossManager
+            // Update accumulated damage in TrackedBossManager
             plugin.getTrackedBossManager().addDamage(mobInternalName.toUpperCase(), damager, newDamage);
             plugin.getTrackedBossManager().setBossMaxHealth(mobInternalName.toUpperCase(), maxHealth);
 
-            // Actualizar la base de datos con el daño total acumulado
+            // Update database with total accumulated damage
             plugin.getDatabaseManager().updateDamage(
                     mobInternalName,
                     damager.getUniqueId(),
                     damager.getName(),
-                    totalDamage // Envía el total acumulado en lugar del daño del último golpe
+                    totalDamage // Send accumulated total instead of last hit damage
             );
 
         } catch (Exception e) {

@@ -1,5 +1,6 @@
-package com.elplatano0871.damagetracker;
+package com.elplatano0871.damagetracker.utils;
 
+import com.elplatano0871.damagetracker.DamageTracker;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;

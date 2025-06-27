@@ -1,5 +1,7 @@
-package com.elplatano0871.damagetracker;
+package com.elplatano0871.damagetracker.placeholders;
 
+import com.elplatano0871.damagetracker.DamageTracker;
+import com.elplatano0871.damagetracker.managers.DatabaseManager;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -15,14 +17,16 @@ import java.util.stream.Collectors;
  */
 public class DamageTrackerPlaceholder extends PlaceholderExpansion {
     private final DamageTracker plugin;
+    private final DatabaseManager databaseManager;
 
     /**
      * Constructor for DamageTrackerPlaceholder.
      *
      * @param plugin The main plugin instance.
      */
-    public DamageTrackerPlaceholder(DamageTracker plugin) {
+    public DamageTrackerPlaceholder(DamageTracker plugin, DatabaseManager databaseManager) {
         this.plugin = plugin;
+        this.databaseManager = databaseManager;
     }
 
     /**
@@ -32,7 +36,7 @@ public class DamageTrackerPlaceholder extends PlaceholderExpansion {
      */
     @Override
     public @NotNull String getIdentifier() {
-        return "damagetracker_for_mythicmobs";
+        return "dt";
     }
 
     /**
@@ -45,14 +49,14 @@ public class DamageTrackerPlaceholder extends PlaceholderExpansion {
         return "ElPlatano0871";
     }
 
-    /**
-     * Gets the version of this placeholder expansion.
-     *
-     * @return The version string.
-     */
     @Override
     public @NotNull String getVersion() {
-        return "2.0";
+        return plugin.getDescription().getVersion();
+    }
+
+    @Override
+    public boolean canRegister() {
+        return plugin != null && plugin.isEnabled();
     }
 
     /**
@@ -64,6 +68,13 @@ public class DamageTrackerPlaceholder extends PlaceholderExpansion {
      */
     @Override
     public String onRequest(OfflinePlayer player, @NotNull String identifier) {
+        // Handle leaderboard placeholders (from DamageLeaderboardExpansion)
+        if (identifier.startsWith("damagetop_")) {
+            String bossName = identifier.substring(10); 
+            return databaseManager.getFormattedLeaderboard(bossName);
+        }
+
+        // Handle general damage placeholders (original functionality)
         Map<UUID, Double> totalDamageMap = new HashMap<>();
         Map<UUID, Map<UUID, Double>> allDamageData = plugin.getAllDamageData();
 

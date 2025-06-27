@@ -1,4 +1,4 @@
-package com.elplatano0871.damagetracker;
+package com.elplatano0871.damagetracker.configs;
 
 import java.util.Objects;
 
@@ -9,6 +9,7 @@ public class BossConfig {
     private String nonParticipantMessageId;
     private int topPlayersToShow;
     private boolean broadcastMessage;
+    private String hologramType; 
 
     /**
      * Constructor for BossConfig with all parameters
@@ -21,13 +22,14 @@ public class BossConfig {
      * @param broadcastMessage Whether to broadcast the message to all players
      */
     public BossConfig(String victoryMessageId, String positionFormatId, String personalMessageId,
-                      String nonParticipantMessageId, int topPlayersToShow, boolean broadcastMessage) {
+                      String nonParticipantMessageId, int topPlayersToShow, boolean broadcastMessage, String hologramType) {
         this.victoryMessageId = victoryMessageId;
         this.positionFormatId = positionFormatId;
         this.personalMessageId = personalMessageId;
         this.nonParticipantMessageId = nonParticipantMessageId;
         this.topPlayersToShow = topPlayersToShow;
         this.broadcastMessage = broadcastMessage;
+        this.hologramType = hologramType;
     }
 
     /**
@@ -40,6 +42,7 @@ public class BossConfig {
         this.nonParticipantMessageId = "DEFAULT";
         this.topPlayersToShow = 3;
         this.broadcastMessage = true;
+        this.hologramType = "NONE";
     }
 
     /**
@@ -151,19 +154,21 @@ public class BossConfig {
     }
 
     /**
-     * Creates a copy of this BossConfig
+     * Gets the hologram type
      *
-     * @return A new BossConfig instance with the same values
+     * @return Hologram type (NONE, FANCY)
      */
-    public BossConfig copy() {
-        return new BossConfig(
-                this.victoryMessageId,
-                this.positionFormatId,
-                this.personalMessageId,
-                this.nonParticipantMessageId,
-                this.topPlayersToShow,
-                this.broadcastMessage
-        );
+    public String getHologramType() {
+        return hologramType;
+    }
+
+    /**
+     * Sets the hologram type
+     *
+     * @param hologramType New hologram type
+     */
+    public void setHologramType(String hologramType) {
+        this.hologramType = hologramType;
     }
 
     /**
@@ -190,6 +195,30 @@ public class BossConfig {
         if (topPlayersToShow < 1) {
             topPlayersToShow = 3;
         }
+        
+        if (hologramType == null || hologramType.trim().isEmpty()) {
+            hologramType = "NONE";
+        }
+        
+        // Validate hologram type
+        if (!hologramType.equals("NONE") && !hologramType.equals("FANCY")) {
+            hologramType = "NONE";
+        }
+    }
+
+    /**
+     * Creates a copy of this BossConfig
+     */
+    public BossConfig copy() {
+        return new BossConfig(
+                this.victoryMessageId,
+                this.positionFormatId,
+                this.personalMessageId,
+                this.nonParticipantMessageId,
+                this.topPlayersToShow,
+                this.broadcastMessage,
+                this.hologramType
+        );
     }
 
     @Override

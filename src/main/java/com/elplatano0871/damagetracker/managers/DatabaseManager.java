@@ -1,5 +1,6 @@
-package com.elplatano0871.damagetracker;
+package com.elplatano0871.damagetracker.managers;
 
+import com.elplatano0871.damagetracker.DamageTracker;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -92,6 +93,9 @@ public class DatabaseManager {
     }
 
     public String getFormattedLeaderboard(String bossName) {
+        plugin.getLogger().info("Consultando leaderboard para: " + bossName); // Log
+        int count = 0;
+        
         String sql = """
             SELECT player_name, damage
             FROM boss_damage
@@ -108,6 +112,7 @@ public class DatabaseManager {
 
             int position = 1;
             while (rs.next()) {
+                count ++;
                 String playerName = rs.getString("player_name");
                 double damage = rs.getDouble("damage");
 
@@ -120,6 +125,7 @@ public class DatabaseManager {
                 result.append(entry).append("\n");
                 position++;
             }
+            plugin.getLogger().info("Resultados encontrados: " + count); // Log
         } catch (SQLException e) {
             plugin.getLogger().severe("Could not get leaderboard: " + e.getMessage());
             return "Error loading leaderboard";

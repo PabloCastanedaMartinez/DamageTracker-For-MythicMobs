@@ -1,5 +1,6 @@
-package com.elplatano0871.damagetracker;
+package com.elplatano0871.damagetracker.managers;
 
+import com.elplatano0871.damagetracker.DamageTracker;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
