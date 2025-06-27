@@ -93,7 +93,6 @@ public class DatabaseManager {
     }
 
     public String getFormattedLeaderboard(String bossName) {
-        plugin.getLogger().info("Consultando leaderboard para: " + bossName); // Log
         int count = 0;
         
         String sql = """
@@ -125,7 +124,6 @@ public class DatabaseManager {
                 result.append(entry).append("\n");
                 position++;
             }
-            plugin.getLogger().info("Resultados encontrados: " + count); // Log
         } catch (SQLException e) {
             plugin.getLogger().severe("Could not get leaderboard: " + e.getMessage());
             return "Error loading leaderboard";
